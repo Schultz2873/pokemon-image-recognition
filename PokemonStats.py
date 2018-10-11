@@ -23,5 +23,8 @@ with open('../cleaned/pokemon-stats-clean.csv') as file:
         "Speed", "Generation", "Legendary", "Color", "Mega Evolution", "Height", "Weight", "Body Type"))
     print()
     for pokemon in pokemon_list:
-        print(
-            f'{pokemon.number:8} {pokemon.name:12} {pokemon.type1:10} {pokemon.type2:10} {pokemon.total:8} {pokemon.hp:12} {pokemon.attack:7} {pokemon.defense:10} {pokemon.special_attack:16} {pokemon.special_defense:17} {pokemon.speed:7} {pokemon.generation:12} {pokemon.isLegendary:12} {pokemon.color:10} {pokemon.has_mega_evolution:19}{pokemon.height:9} {pokemon.weight:9} {pokemon.body_style:7}')
+        print(f'{pokemon.number:8} {pokemon.name:12} {pokemon.type1:10} {pokemon.type2:10} {pokemon.total:8} '
+              f'{pokemon.hp:12} {pokemon.attack:7} {pokemon.defense:10} {pokemon.special_attack:16} '
+              f'{pokemon.special_defense:17} {pokemon.speed:7} {pokemon.generation:12} {pokemon.isLegendary:12} '
+              f'{pokemon.color:10} {pokemon.has_mega_evolution:19}{pokemon.height:9} {pokemon.weight:9} '
+              f'{pokemon.body_style:7}')

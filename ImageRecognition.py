@@ -38,7 +38,7 @@ test_set= test_datagen.flow_from_directory('datasets/pikachu', target_size=(64, 
 from IPython.display import display
 from PIL import Image
 
-classifier.fit_generator(training_set, steps_per_epoch=8000, epochs=10, validation_data=test_set, validation_steps=800)
+classifier.fit_generator(training_set, steps_per_epoch=500, epochs=1, validation_data=test_set, validation_steps=800)
 
 #Testing
 import numpy as np

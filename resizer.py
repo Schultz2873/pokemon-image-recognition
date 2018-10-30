@@ -1,8 +1,8 @@
 from PIL import Image
 import os
 
-# directory_path = 'datasets/original/images/pokemon-images'
-directory_path = 'datasets/original/images/pokemon-a'
+# directory_path = 'datasets2/original/images/pokemon-images'
+directory_path = 'datasets2/original/images/pokemon-a'
 
 img_width = 256
 img_height = 256

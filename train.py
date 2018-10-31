@@ -1,5 +1,5 @@
 # USAGE
-# python train.py --dataset dataset --model pokedex.model --labelbin lb.pickle
+# python train.py --poke_dataset poke_dataset --ml_model pokedex.ml_model --labelbin lb.pickle
 
 # set the matplotlib backend so figures can be saved in the background
 import matplotlib
@@ -23,10 +23,10 @@ import os
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-d", "--dataset", required=True,
-	help="path to input dataset (i.e., directory of images)")
-ap.add_argument("-m", "--model", required=True,
-	help="path to output model")
+ap.add_argument("-d", "--poke_dataset", required=True,
+	help="path to input poke_dataset (i.e., directory of images)")
+ap.add_argument("-m", "--ml_model", required=True,
+	help="path to output ml_model")
 ap.add_argument("-l", "--labelbin", required=True,
 	help="path to output label binarizer")
 ap.add_argument("-p", "--plot", type=str, default="plot.png",
@@ -46,7 +46,7 @@ labels = []
 
 # grab the image paths and randomly shuffle them
 print("[INFO] loading images...")
-imagePaths = sorted(list(paths.list_images(args["dataset"])))
+imagePaths = sorted(list(paths.list_images(args["poke_dataset"])))
 random.seed(42)
 random.shuffle(imagePaths)
 
@@ -83,8 +83,8 @@ aug = ImageDataGenerator(rotation_range=25, width_shift_range=0.1,
 	height_shift_range=0.1, shear_range=0.2, zoom_range=0.2,
 	horizontal_flip=True, fill_mode="nearest")
 
-# initialize the model
-print("[INFO] compiling model...")
+# initialize the ml_model
+print("[INFO] compiling ml_model...")
 model = SmallerVGGNet.build(width=IMAGE_DIMS[1], height=IMAGE_DIMS[0],
 	depth=IMAGE_DIMS[2], classes=len(lb.classes_))
 opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
@@ -99,9 +99,9 @@ H = model.fit_generator(
 	steps_per_epoch=len(trainX) // BS,
 	epochs=EPOCHS, verbose=1)
 
-# save the model to disk
+# save the ml_model to disk
 print("[INFO] serializing network...")
-model.save(args["model"])
+model.save(args["ml_model"])
 
 # save the label binarizer to disk
 print("[INFO] serializing label binarizer...")

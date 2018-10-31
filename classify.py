@@ -1,5 +1,5 @@
 # USAGE
-# python classify.py --model pokedex.model --labelbin lb.pickle --image examples/charmander_counter.png
+# python classify.py --ml_model pokedex.ml_model --labelbin lb.pickle --image examples/charmander_counter.png
 
 # import the necessary packages
 from keras.preprocessing.image import img_to_array
@@ -13,8 +13,8 @@ import os
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-m", "--model", required=True,
-	help="path to trained model model")
+ap.add_argument("-m", "--ml_model", required=True,
+	help="path to trained ml_model ml_model")
 ap.add_argument("-l", "--labelbin", required=True,
 	help="path to label binarizer")
 ap.add_argument("-i", "--image", required=True,
@@ -34,7 +34,7 @@ image = np.expand_dims(image, axis=0)
 # load the trained convolutional neural network and the label
 # binarizer
 print("[INFO] loading network...")
-model = load_model(args["model"])
+model = load_model(args["ml_model"])
 lb = pickle.loads(open(args["labelbin"], "rb").read())
 
 # classify the input image

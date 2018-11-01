@@ -4,21 +4,11 @@ from shutil import copyfile
 import random
 
 
-def move_random_files(source_path: str, destination_path: str, percentage):
-    if 0 <= percentage <= 1:
-        file_names = [f for f in os.listdir(source_path) if isfile(join(source_path, f))]
-
-        for i in range(int(len(file_names) * percentage)):
-            random_index = random.randint(0, len(file_names))
-            file_name = file_names[random_index]
-            os.rename(source_path + '/' + file_name, destination_path + '/' + file_name)
-            file_names.pop(random_index)
-
-
 def split_directory(source_path: str, destination_path1: str, destination_path2: str, percentage: float,
                     is_random: bool = True, is_copy: bool = True):
     """
-    Splits a target directory into two separate directories with amount of files determined by a split percentage value.
+    Splits a target directory into two separate directories with the amount of files determined by a split percentage
+    value.
     :param source_path: The target directory to be split.
     :param destination_path1: The destination directory. The percentage of files specified will be placed here.
     :param destination_path2: The second destination directory. Remainder files (1 - percentage) will be placed here.

@@ -39,7 +39,7 @@ def show_plot(history):
 
 
 def test():
-    img_width, img_height = 150, 150
+    img_width, img_height = 50, 50
 
     steps_per_epoch = 2000
     epochs = 50

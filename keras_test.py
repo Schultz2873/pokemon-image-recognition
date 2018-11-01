@@ -42,7 +42,7 @@ def test():
     img_width, img_height = 150, 150
 
     steps_per_epoch = 2000
-    epochs = 5
+    epochs = 50
     validation_steps = 800
     batch_size = 16
 
@@ -129,6 +129,8 @@ def test():
 
     # save the model's .h5 file
     save_model(model)
+
+    predictions = model.predict()
 
 
 test()

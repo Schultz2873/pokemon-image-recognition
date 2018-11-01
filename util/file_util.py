@@ -17,25 +17,48 @@ def move_random_files(source_path: str, destination_path: str, percentage):
 
 def split_directory(source_path: str, destination_path1: str, destination_path2: str, percentage: float,
                     is_random: bool = True, is_copy: bool = True):
+    """
+    Splits a target directory into two separate directories with amount of files determined by a split percentage value.
+    :param source_path: The target directory to be split.
+    :param destination_path1: The destination directory. The percentage of files specified will be placed here.
+    :param destination_path2: The second destination directory. Remainder files (1 - percentage) will be placed here.
+    :param percentage: The amount of files to be placed in the directory determined by destination_path1
+    :param is_random: If true, files will be randomly chosen, else chosen in order as appearing in directory.
+    :param is_copy: If true, files will be copied, else files will be moved.
+    :return:
+    """
     if 0 <= percentage <= 1:
+
+        if not os.path.exists(destination_path1):
+            os.mkdir(destination_path1)
+
+        if not os.path.exists(destination_path2):
+            os.mkdir(destination_path2)
+
         # get file names from source path
         file_names = [f for f in os.listdir(source_path) if isfile(join(source_path, f))]
         destination1_file_names = []
 
+        print(len(file_names))
+
         # iterate through files, popping selected files from file_names into destination1_file_names
         # file_names becomes remainder file list
         i = 0
-        while i < len(file_names):
+        iterations = int(len(file_names) * percentage)
+        while i < iterations:
 
             # if random, select random file, else select current index file
             if is_random:
                 index = random.randint(0, len(file_names) - 1)
             else:
-                index = i
+                index = 0
 
             # pop file from file_names into destination1_file_names
             destination1_file_names.append(file_names.pop(index))
             i += 1
+
+        print(len(destination1_file_names))
+        print(len(file_names))
 
         # copy or move files in destination1_file_names to destination_path1
         for i in range(len(destination1_file_names)):
@@ -54,3 +77,8 @@ def _copy_or_move(source_path, destination_path, file_names, index, is_copy):
         copyfile(source, destination)
     else:
         os.rename(source, destination)
+
+# split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/squirtle',
+#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/squirtle',
+#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/squirtle',
+#                 .7)

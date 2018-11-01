@@ -130,7 +130,5 @@ def test():
     # save the model's .h5 file
     save_model(model)
 
-    predictions = model.predict()
-
 
 test()

@@ -4,6 +4,7 @@ from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import backend as kb
+from keras.models import load_model
 import matplotlib.pyplot as plt
 
 from util.file_util import count_subdirectories
@@ -12,11 +13,23 @@ from util.file_util import count_subdirectories
 import datetime
 
 
-def keras_save(model):
+def save_model(model, name: str = None):
+    model_directory = 'keras_model/'
+    weights_directory = 'keras_weights/'
     now_string = str(datetime.datetime.now())
     now_string = now_string.replace(':', '-')
-    model.save_weights('keras_weights/weights-' + now_string + '.h5')
-    model.save('keras_model/model-' + now_string + '.h5')
+    if name is None:
+        model.save_weights(weights_directory + 'weights-' + now_string + '.h5')
+        model.save(model_directory + 'model-' + now_string + '.h5')
+    else:
+        model.save_weights(weights_directory + name + '.h5')
+        model.save(model_directory + name + '.h5')
+
+
+def show_predictions(model_path: str, images: list):
+    model: Sequential = load_model(model_path)
+    predictions = model.predict(images)
+    print(predictions[0])
 
 
 def show_plot(history):
@@ -52,7 +65,7 @@ def test():
     channels = 3
 
     steps_per_epoch = 2000
-    epochs = 1
+    epochs = 15
     validation_steps = 800
     batch_size = 16
 
@@ -133,7 +146,8 @@ def test():
     #                    overwrite=True)  # always save your weights after training or during training
 
     # save the model's .h5 file
-    keras_save(model)
+    save_model(model)
 
 
 test()
+# show_predictions('keras_model/model-2018-11-06 16-04-32.327919.h5', )

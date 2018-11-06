@@ -41,6 +41,8 @@ def show_plot(history):
 def test():
     img_width, img_height = 50, 50
 
+    channels = 3
+
     steps_per_epoch = 2000
     epochs = 10
     validation_steps = 800
@@ -54,9 +56,9 @@ def test():
     # weights_directory = 'weights'
 
     if kb.image_data_format() == 'channels_first':
-        input_shape = (3, img_width, img_height)
+        input_shape = (channels, img_width, img_height)
     else:
-        input_shape = (img_width, img_height, 3)
+        input_shape = (img_width, img_height, channels)
 
     model = Sequential()
     # add layers
@@ -78,7 +80,7 @@ def test():
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(1))
+    model.add(Dense(3))
     model.add(Activation('sigmoid'))
 
     model.compile(loss='categorical_crossentropy',

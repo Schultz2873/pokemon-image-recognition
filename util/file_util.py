@@ -68,7 +68,8 @@ def _copy_or_move(source_path, destination_path, file_names, index, is_copy):
     else:
         os.rename(source, destination)
 
-# split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/squirtle',
-#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/squirtle',
-#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/squirtle',
+
+# split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/charmander',
+#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/charmander',
+#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/charmander',
 #                 .7)

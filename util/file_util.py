@@ -69,6 +69,14 @@ def _copy_or_move(source_path, destination_path, file_names, index, is_copy):
         os.rename(source, destination)
 
 
+def count_subdirectories(directory):
+    count = 0
+    directory_list = os.listdir(directory)
+    for name in directory_list:
+        if os.path.isdir(directory + '/' + name):
+            count += 1
+    return count
+
 # split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/charmander',
 #                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/charmander',
 #                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/charmander',

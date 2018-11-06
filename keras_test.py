@@ -6,14 +6,17 @@ from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import backend as kb
 import matplotlib.pyplot as plt
 
+from util.file_util import count_subdirectories
+
 # for naming generated files
 import datetime
 
 
-def save_model(model):
+def keras_save(model):
     now_string = str(datetime.datetime.now())
     now_string = now_string.replace(':', '-')
-    model.save('keras_model/' + now_string + '.h5')
+    model.save_weights('keras_weights/weights-' + now_string + '.h5')
+    model.save('keras_model/model-' + now_string + '.h5')
 
 
 def show_plot(history):
@@ -39,21 +42,19 @@ def show_plot(history):
 
 
 def test():
-    img_width, img_height = 50, 50
-
-    channels = 3
-
-    steps_per_epoch = 2000
-    epochs = 10
-    validation_steps = 800
-    batch_size = 16
-
-    class_mode = 'categorical'
-
     training_directory = 'datasets/pokemon/train'
     validation_directory = 'datasets/pokemon/validate'
 
-    # weights_directory = 'weights'
+    class_count = count_subdirectories(training_directory)
+    class_mode = 'categorical'
+
+    img_width, img_height = 50, 50
+    channels = 3
+
+    steps_per_epoch = 2000
+    epochs = 1
+    validation_steps = 800
+    batch_size = 16
 
     if kb.image_data_format() == 'channels_first':
         input_shape = (channels, img_width, img_height)
@@ -80,7 +81,7 @@ def test():
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(3))
+    model.add(Dense(class_count))
     model.add(Activation('sigmoid'))
 
     model.compile(loss='categorical_crossentropy',
@@ -132,7 +133,7 @@ def test():
     #                    overwrite=True)  # always save your weights after training or during training
 
     # save the model's .h5 file
-    save_model(model)
+    keras_save(model)
 
 
 test()

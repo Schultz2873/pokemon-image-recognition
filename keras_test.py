@@ -42,9 +42,11 @@ def test():
     img_width, img_height = 50, 50
 
     steps_per_epoch = 2000
-    epochs = 50
+    epochs = 10
     validation_steps = 800
     batch_size = 16
+
+    class_mode = 'categorical'
 
     training_directory = 'datasets/pokemon/train'
     validation_directory = 'datasets/pokemon/validate'
@@ -58,15 +60,15 @@ def test():
 
     model = Sequential()
     # add layers
-    model.add(Conv2D(32, (3, 3), input_shape=input_shape))
+    model.add(Conv2D(64, (3, 3), input_shape=input_shape))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(32, (3, 3)))
+    model.add(Conv2D(16, (3, 3)))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(64, (3, 3)))
+    model.add(Conv2D(16, (3, 3)))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -79,7 +81,7 @@ def test():
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
 
-    model.compile(loss='binary_crossentropy',
+    model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
                   metrics=['accuracy'])
 
@@ -105,14 +107,14 @@ def test():
         training_directory,  # this is the target directory
         target_size=(img_width, img_height),  # all images will be resized to 150x150
         batch_size=batch_size,
-        class_mode='binary')  # since we use binary_crossentropy loss, we need binary labels
+        class_mode=class_mode)  # since we use binary_crossentropy loss, we need binary labels
 
     # this is a similar generator, for validation data
     validation_generator = test_datagen.flow_from_directory(
         validation_directory,
         target_size=(img_width, img_height),
         batch_size=batch_size,
-        class_mode='binary')
+        class_mode=class_mode)
 
     history = model.fit_generator(
         train_generator,

@@ -2,6 +2,8 @@ import os
 from os.path import isfile, join
 from shutil import copyfile
 import random
+# for naming generated files
+import datetime
 
 
 def get_files(directory_path):
@@ -81,6 +83,12 @@ def count_subdirectories(directory):
             count += 1
     return count
 
+
+def date_string_now():
+    now_string = str(datetime.datetime.now())
+    now_string = now_string.replace(':', '-')
+
+    return now_string
 
 # split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/squirtle',
 #                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/squirtle',

@@ -11,21 +11,17 @@ import matplotlib.pyplot as plt
 # for file management
 import util.file_util as file_util
 
-# for naming generated files
-import datetime
 
-
-def save_model(model, name: str = None):
+def save_model(model, file_name: str = None):
     model_directory = 'keras_model/'
     weights_directory = 'keras_weights/'
-    now_string = str(datetime.datetime.now())
-    now_string = now_string.replace(':', '-')
-    if name is None:
-        model.save_weights(weights_directory + 'weights-' + now_string + '.h5')
-        model.save(model_directory + 'model-' + now_string + '.h5')
-    else:
-        model.save_weights(weights_directory + name + '.h5')
-        model.save(model_directory + name + '.h5')
+    extension = '.h5'
+
+    if file_name is None:
+        file_name = file_util.date_string_now()
+
+    model.save_weights(weights_directory + file_name + extension)
+    model.save(model_directory + file_name + extension)
 
 
 def show_predictions(model: str, images_path: str, width, height):
@@ -46,7 +42,11 @@ def show_predictions(model: str, images_path: str, width, height):
     print('prediction indices:\n', model.predict_classes(images))
 
 
-def show_plot(history):
+def show_plot(history, file_name: str = None):
+    accuracy_directory = 'graphs/accuracy/'
+    loss_directory = 'graphs/loss/'
+    extension = '.png'
+
     fig_size = [8, 6]
     line_width = 3.0
     font_size = 16
@@ -60,6 +60,8 @@ def show_plot(history):
     plt.xlabel('Epochs ', fontsize=font_size)
     plt.ylabel('Loss', fontsize=font_size)
     plt.title('Loss Curves', fontsize=font_size)
+    if file_name is not None:
+        plt.savefig(accuracy_directory + 'accuracy-' + file_name + extension)
     plt.show()
 
     # Plot the Accuracy Curves
@@ -70,6 +72,8 @@ def show_plot(history):
     plt.xlabel('Epochs ', fontsize=font_size)
     plt.ylabel('Accuracy', fontsize=font_size)
     plt.title('Accuracy Curves', fontsize=font_size)
+    if file_name is not None:
+        plt.savefig(loss_directory + 'loss-' + file_name + extension)
     plt.show()
 
 
@@ -83,8 +87,11 @@ def test():
     img_width, img_height = 50, 50
     channels = 3
 
+    inner_layers = 3
+    inner_layer_filters = 16
+
     steps_per_epoch = 2000
-    epochs = 2
+    epochs = 15
     validation_steps = 800
     batch_size = 16
 
@@ -99,21 +106,15 @@ def test():
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(16, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(16, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    # the ml_model so far outputs 3D feature maps (height, width, features)
+    for i in range(inner_layers):
+        model.add(Conv2D(inner_layer_filters, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
-    # model.add(Dense(num_classes, activation='softmax'))
     model.add(Dense(num_classes))
     model.add(Activation('softmax'))
 
@@ -146,12 +147,16 @@ def test():
         batch_size=batch_size,
         class_mode=class_mode)
 
+    print('train_generator class indices:\n', train_generator.class_indices)
+
     # this is a similar generator, for validation data
     validation_generator = test_datagen.flow_from_directory(
         validation_directory,
         target_size=(img_width, img_height),
         batch_size=batch_size,
         class_mode=class_mode)
+
+    print('validation_generator class indices:\n', validation_generator.class_indices)
 
     history = model.fit_generator(
         train_generator,
@@ -161,9 +166,16 @@ def test():
         validation_steps=validation_steps // batch_size)
 
     print(history.history.keys())
-    show_plot(history)
-    save_model(model)
+
+    # file naming strings
+    info_string = 'epochs-' + str(epochs) + '-inner_layers-' + str(inner_layers) + '-filters-' + str(
+        inner_layer_filters) + '-'
+    now_string = file_util.date_string_now()
+
+    # save and show data
+    show_plot(history, info_string + now_string)
+    save_model(model, info_string + now_string)
 
 
-# test()
-show_predictions('keras_model/model-2018-11-08 02-26-40.603337.h5', 'examples', 50, 50)
+test()
+# show_predictions('keras_model/model-2018-11-08 02-26-40.603337.h5', 'examples', 50, 50)

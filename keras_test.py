@@ -74,6 +74,7 @@ def show_plot(history, file_name: str = None):
     plt.xlabel('Epochs ', fontsize=font_size)
     plt.ylabel('Loss', fontsize=font_size)
     plt.title('Loss Curves', fontsize=font_size)
+
     if file_name is not None:
         plt.savefig(loss_directory + 'loss-' + file_name + extension)
     plt.show()
@@ -86,6 +87,7 @@ def show_plot(history, file_name: str = None):
     plt.xlabel('Epochs ', fontsize=font_size)
     plt.ylabel('Accuracy', fontsize=font_size)
     plt.title('Accuracy Curves', fontsize=font_size)
+
     if file_name is not None:
         plt.savefig(accuracy_directory + 'accuracy-' + file_name + extension)
     plt.show()
@@ -105,7 +107,7 @@ def test():
     inner_layer_filters = 16
 
     steps_per_epoch = 2000
-    epochs = 20
+    epochs = 1
     validation_steps = 800
     batch_size = 16
 
@@ -115,7 +117,7 @@ def test():
         input_shape = (img_width, img_height, channels)
 
     model = Sequential()
-    # add layers
+
     model.add(Conv2D(64, (3, 3), input_shape=input_shape))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
@@ -148,13 +150,8 @@ def test():
         horizontal_flip=True,
         fill_mode='nearest')
 
-    # this is the augmentation configuration we will use for testing:
-    # only rescaling
     test_datagen = ImageDataGenerator(rescale=1. / 255)
 
-    # this is a generator that will read pictures found in
-    # sub-folders of 'data/train', and indefinitely generate
-    # batches of augmented image data
     train_generator = train_datagen.flow_from_directory(
         training_directory,
         target_size=(img_width, img_height),
@@ -163,7 +160,6 @@ def test():
 
     print('train_generator class indices:\n', train_generator.class_indices)
 
-    # this is a similar generator, for validation data
     validation_generator = test_datagen.flow_from_directory(
         validation_directory,
         target_size=(img_width, img_height),
@@ -192,4 +188,4 @@ def test():
 
 
 # test()
-show_predictions('keras_model/epochs-20-inner_layers-3-filters-16-2018-11-08 08-17-58.011733.h5', 'examples', 50, 50)
+show_predictions('keras_model/1-epochs-3-inner_layers-16-filters-2018-11-08 12-00-37.016254.h5', 'examples', 50, 50)

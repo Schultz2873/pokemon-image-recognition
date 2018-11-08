@@ -28,8 +28,8 @@ def save_model(model, name: str = None):
         model.save(model_directory + name + '.h5')
 
 
-def show_predictions(model_path: str, images_path: str, width, height):
-    model: Sequential = load_model(model_path)
+def show_predictions(model: str, images_path: str, width, height):
+    model: Sequential = load_model(model)
     model.summary()
     images = []
     files = file_util.get_files(images_path)
@@ -84,7 +84,7 @@ def test():
     channels = 3
 
     steps_per_epoch = 2000
-    epochs = 15
+    epochs = 2
     validation_steps = 800
     batch_size = 16
 
@@ -109,12 +109,13 @@ def test():
 
     # the ml_model so far outputs 3D feature maps (height, width, features)
 
-    model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
+    model.add(Flatten())
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(num_classes, activation='softmax'))
-    # model.add(Activation('sigmoid'))
+    # model.add(Dense(num_classes, activation='softmax'))
+    model.add(Dense(num_classes))
+    model.add(Activation('softmax'))
 
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
@@ -140,10 +141,10 @@ def test():
     # sub-folders of 'data/train', and indefinitely generate
     # batches of augmented image data
     train_generator = train_datagen.flow_from_directory(
-        training_directory,  # this is the target directory
-        target_size=(img_width, img_height),  # all images will be resized to 150x150
+        training_directory,
+        target_size=(img_width, img_height),
         batch_size=batch_size,
-        class_mode=class_mode)  # since we use binary_crossentropy loss, we need binary labels
+        class_mode=class_mode)
 
     # this is a similar generator, for validation data
     validation_generator = test_datagen.flow_from_directory(
@@ -161,13 +162,8 @@ def test():
 
     print(history.history.keys())
     show_plot(history)
-
-    # model.save_weights(weights_directory + '/first_try.h5',
-    #                    overwrite=True)  # always save your weights after training or during training
-
-    # save the model's .h5 file
     save_model(model)
 
 
 # test()
-show_predictions('keras_model/model-2018-11-08 01-07-24.778151.h5', 'examples', 50, 50)
+show_predictions('keras_model/model-2018-11-08 02-26-40.603337.h5', 'examples', 50, 50)

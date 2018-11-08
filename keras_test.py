@@ -1,15 +1,14 @@
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
-
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import backend as kb
 from keras.models import load_model
 from keras.preprocessing import image
-from keras.applications.resnet50 import preprocess_input, decode_predictions
 import numpy as np
 import matplotlib.pyplot as plt
 
+# for file management
 import util.file_util as file_util
 
 # for naming generated files
@@ -48,24 +47,29 @@ def show_predictions(model_path: str, images_path: str, width, height):
 
 
 def show_plot(history):
+    fig_size = [8, 6]
+    line_width = 3.0
+    font_size = 16
+    legend_font_size = 18
+
     # Plot the Loss Curves
-    plt.figure(figsize=[8, 6])
-    plt.plot(history.history['loss'], 'r', linewidth=3.0)
-    plt.plot(history.history['val_loss'], 'b', linewidth=3.0)
-    plt.legend(['Training loss', 'Validation Loss'], fontsize=18)
-    plt.xlabel('Epochs ', fontsize=16)
-    plt.ylabel('Loss', fontsize=16)
-    plt.title('Loss Curves', fontsize=16)
+    plt.figure(figsize=fig_size)
+    plt.plot(history.history['loss'], 'r', linewidth=line_width)
+    plt.plot(history.history['val_loss'], 'b', linewidth=line_width)
+    plt.legend(['Training loss', 'Validation Loss'], fontsize=legend_font_size)
+    plt.xlabel('Epochs ', fontsize=font_size)
+    plt.ylabel('Loss', fontsize=font_size)
+    plt.title('Loss Curves', fontsize=font_size)
     plt.show()
 
     # Plot the Accuracy Curves
-    plt.figure(figsize=[8, 6])
-    plt.plot(history.history['acc'], 'r', linewidth=3.0)
-    plt.plot(history.history['val_acc'], 'b', linewidth=3.0)
-    plt.legend(['Training Accuracy', 'Validation Accuracy'], fontsize=18)
-    plt.xlabel('Epochs ', fontsize=16)
-    plt.ylabel('Accuracy', fontsize=16)
-    plt.title('Accuracy Curves', fontsize=16)
+    plt.figure(figsize=fig_size)
+    plt.plot(history.history['acc'], 'r', linewidth=line_width)
+    plt.plot(history.history['val_acc'], 'b', linewidth=line_width)
+    plt.legend(['Training Accuracy', 'Validation Accuracy'], fontsize=legend_font_size)
+    plt.xlabel('Epochs ', fontsize=font_size)
+    plt.ylabel('Accuracy', fontsize=font_size)
+    plt.title('Accuracy Curves', fontsize=font_size)
     plt.show()
 
 

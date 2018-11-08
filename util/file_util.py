@@ -4,6 +4,10 @@ from shutil import copyfile
 import random
 
 
+def get_files(directory_path):
+    return [f for f in os.listdir(directory_path) if isfile(join(directory_path, f))]
+
+
 def split_directory(source_path: str, destination_path1: str, destination_path2: str, percentage: float,
                     is_random: bool = True, is_copy: bool = True):
     """
@@ -77,7 +81,8 @@ def count_subdirectories(directory):
             count += 1
     return count
 
-# split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/charmander',
-#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/charmander',
-#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/charmander',
+
+# split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/squirtle',
+#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/squirtle',
+#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/squirtle',
 #                 .7)

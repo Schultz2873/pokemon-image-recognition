@@ -5,9 +5,12 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import backend as kb
 from keras.models import load_model
+from keras.preprocessing import image
+from keras.applications.resnet50 import preprocess_input, decode_predictions
+import numpy as np
 import matplotlib.pyplot as plt
 
-from util.file_util import count_subdirectories
+import util.file_util as file_util
 
 # for naming generated files
 import datetime
@@ -26,10 +29,22 @@ def save_model(model, name: str = None):
         model.save(model_directory + name + '.h5')
 
 
-def show_predictions(model_path: str, images: list):
+def show_predictions(model_path: str, images_path: str, width, height):
     model: Sequential = load_model(model_path)
-    predictions = model.predict(images)
-    print(predictions[0])
+    model.summary()
+    images = []
+    files = file_util.get_files(images_path)
+    print(files)
+
+    for file in files:
+        img = image.load_img(images_path + '/' + file, target_size=(width, height))
+        img = image.img_to_array(img)
+        img = np.expand_dims(img, axis=0)
+        images.append(img)
+
+    images = np.vstack(images)
+    print('predictions:\n', model.predict(images))
+    print('prediction indices:\n', model.predict_classes(images))
 
 
 def show_plot(history):
@@ -58,7 +73,7 @@ def test():
     training_directory = 'datasets/pokemon/train'
     validation_directory = 'datasets/pokemon/validate'
 
-    class_count = count_subdirectories(training_directory)
+    num_classes = file_util.count_subdirectories(training_directory)
     class_mode = 'categorical'
 
     img_width, img_height = 50, 50
@@ -94,11 +109,12 @@ def test():
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(class_count))
-    model.add(Activation('sigmoid'))
+    model.add(Dense(num_classes, activation='softmax'))
+    # model.add(Activation('sigmoid'))
 
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
+                  # optimizer='adam',
                   metrics=['accuracy'])
 
     # this is the augmentation configuration we will use for training
@@ -149,5 +165,5 @@ def test():
     save_model(model)
 
 
-test()
-# show_predictions('keras_model/model-2018-11-06 16-04-32.327919.h5', )
+# test()
+show_predictions('keras_model/model-2018-11-08 01-07-24.778151.h5', 'examples', 50, 50)

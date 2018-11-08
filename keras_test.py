@@ -38,8 +38,22 @@ def show_predictions(model: str, images_path: str, width, height):
         images.append(img)
 
     images = np.vstack(images)
-    print('predictions:\n', model.predict(images))
-    print('prediction indices:\n', model.predict_classes(images))
+    predictions = model.predict(images)
+    classes = model.predict_classes(images)
+    print('predictions:\n', predictions)
+    print('prediction indices:\n', classes)
+    for class_value in classes:
+        print(str(class_value) + ': ', end='')
+        if class_value == 0:
+            print('bulbasaur')
+        elif class_value == 1:
+            print('charmander')
+        elif class_value == 2:
+            print('mewtwo')
+        elif class_value == 3:
+            print('pikachu')
+        elif class_value == 4:
+            print('squirtle')
 
 
 def show_plot(history, file_name: str = None):
@@ -61,7 +75,7 @@ def show_plot(history, file_name: str = None):
     plt.ylabel('Loss', fontsize=font_size)
     plt.title('Loss Curves', fontsize=font_size)
     if file_name is not None:
-        plt.savefig(accuracy_directory + 'accuracy-' + file_name + extension)
+        plt.savefig(loss_directory + 'loss-' + file_name + extension)
     plt.show()
 
     # Plot the Accuracy Curves
@@ -73,7 +87,7 @@ def show_plot(history, file_name: str = None):
     plt.ylabel('Accuracy', fontsize=font_size)
     plt.title('Accuracy Curves', fontsize=font_size)
     if file_name is not None:
-        plt.savefig(loss_directory + 'loss-' + file_name + extension)
+        plt.savefig(accuracy_directory + 'accuracy-' + file_name + extension)
     plt.show()
 
 
@@ -91,7 +105,7 @@ def test():
     inner_layer_filters = 16
 
     steps_per_epoch = 2000
-    epochs = 15
+    epochs = 20
     validation_steps = 800
     batch_size = 16
 
@@ -114,7 +128,7 @@ def test():
     model.add(Flatten())
     model.add(Dense(64))
     model.add(Activation('relu'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.25))
     model.add(Dense(num_classes))
     model.add(Activation('softmax'))
 
@@ -168,8 +182,8 @@ def test():
     print(history.history.keys())
 
     # file naming strings
-    info_string = 'epochs-' + str(epochs) + '-inner_layers-' + str(inner_layers) + '-filters-' + str(
-        inner_layer_filters) + '-'
+    info_string = str(epochs) + '-epochs-' + str(inner_layers) + '-inner_layers-' + str(
+        inner_layer_filters) + '-filters-'
     now_string = file_util.date_string_now()
 
     # save and show data
@@ -177,5 +191,5 @@ def test():
     save_model(model, info_string + now_string)
 
 
-test()
-# show_predictions('keras_model/model-2018-11-08 02-26-40.603337.h5', 'examples', 50, 50)
+# test()
+show_predictions('keras_model/epochs-20-inner_layers-3-filters-16-2018-11-08 08-17-58.011733.h5', 'examples', 50, 50)

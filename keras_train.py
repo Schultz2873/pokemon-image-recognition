@@ -5,13 +5,10 @@ from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import backend as kb
 from keras.models import load_model
 from keras.preprocessing import image
-
 # metrics
 from sklearn import metrics
-
 import numpy as np
 import matplotlib.pyplot as plt
-
 # for file management
 import util.file_util as file_util
 
@@ -40,7 +37,6 @@ def show_predictions(model, images_path: str, width, height):
     model = _get_model(model)
 
     # run predictions on model
-    model.summary()
     images = []
     files = file_util.get_files(images_path)
     print(files)
@@ -137,34 +133,42 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     validation_directory = 'datasets/pokemon/validate'
 
     num_classes = file_util.count_subdirectories(training_directory)
+    num_training_files = file_util.num_files('C:/Users/Colom/PycharmProjects/pokemon-repo/datasets/pokemon/train')
+    num_validation_files = file_util.num_files('C:/Users/Colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate')
+    print('num training files:', num_training_files)
     class_mode = 'categorical'
 
     # img_width, img_height = 100, 100
     channels = 3
 
-    inner_layers = 3
-    inner_layer_filters = 64
+    inner_layers = 4
+    inner_layer_filters = 16
 
-    steps_per_epoch = 2000
-    # epochs = 2
-    validation_steps = 800
     batch_size = 16
+    steps_per_epoch = num_training_files // batch_size
+    # steps_per_epoch = 2000 // batch_size
+    validation_steps = num_validation_files // batch_size
+    # validation_steps = 800 // batch_size
+
+    kernel_size = (3, 3)
 
     if kb.image_data_format() == 'channels_first':
         input_shape = (channels, img_width, img_height)
     else:
         input_shape = (img_width, img_height, channels)
 
+    pool_size = (2, 2)
+
     model = Sequential()
 
-    model.add(Conv2D(64, (3, 3), input_shape=input_shape))
+    model.add(Conv2D(64, kernel_size, input_shape=input_shape))
     model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(MaxPooling2D(pool_size=pool_size))
 
     for i in range(inner_layers):
-        model.add(Conv2D(inner_layer_filters, (3, 3)))
+        model.add(Conv2D(inner_layer_filters, kernel_size))
         model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(MaxPooling2D(pool_size=pool_size))
 
     model.add(Flatten())
     model.add(Dense(64))
@@ -209,33 +213,35 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
     history = model.fit_generator(
         train_generator,
-        steps_per_epoch=steps_per_epoch // batch_size,
+        steps_per_epoch=steps_per_epoch,
         epochs=epochs,
         validation_data=validation_generator,
-        validation_steps=validation_steps // batch_size)
+        validation_steps=validation_steps)
 
     print(history.history.keys())
 
     # file naming strings
-    info_string = str(img_width) + 'x' + str(img_height) + '_' + str(epochs) + '-epochs-' + str(
-        inner_layers) + '-inner_layers-' + str(inner_layer_filters) + '-filters-'
-
     now_string = file_util.date_string_now()
+
+    info_string = str(img_width) + 'x' + str(img_height) + '_' + str(epochs) + '-epochs_' + str(
+        inner_layers) + '-inner_layers_' + str(inner_layer_filters) + '-filters_' + str(batch_size) + '-batch_size'
+
+    file_string = now_string + '_' + info_string
 
     # save and show data
     if show:
-        show_plot(history, info_string + now_string)
+        show_plot(history, file_string)
 
     if save:
-        save_model(model, info_string + now_string)
+        save_model(model, file_string)
 
     return model
 
 
 def run():
-    epochs = 15
-    img_width = 100
-    img_height = 100
+    epochs = 50
+    img_width = 150
+    img_height = img_width
 
     model = train(epochs, img_width, img_height)
     show_predictions(model, 'examples', img_width, img_height)

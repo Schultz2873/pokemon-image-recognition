@@ -12,6 +12,13 @@ def get_files(directory_path):
     return [f for f in os.listdir(directory_path) if isfile(join(directory_path, f))]
 
 
+def num_files(directory):
+    total = 0
+    for root, dirs, files in os.walk(directory):
+        total += len(files)
+    return total
+
+
 def split_directory(source_path: str, destination_path1: str, destination_path2: str, percentage: float,
                     is_random: bool = True, is_copy: bool = True):
     """

@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 # for file management
 import util.file_util as file_util
+import math
 
 
 def save_model(model, file_name: str = None):
@@ -144,10 +145,13 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     inner_layers = 4
     inner_layer_filters = 16
 
-    batch_size = 16
-    steps_per_epoch = num_training_files // batch_size
+    batch_size = 32
+    steps_per_epoch = math.ceil(num_training_files / batch_size)
+    # steps_per_epoch = num_training_files // batch_size
     # steps_per_epoch = 2000 // batch_size
-    validation_steps = num_validation_files // batch_size
+    validation_steps = math.ceil(num_training_files / batch_size)
+    # validation_steps = math.ceil(num_validation_files / batch_size)
+    # validation_steps = num_validation_files // batch_size
     # validation_steps = 800 // batch_size
 
     kernel_size = (3, 3)
@@ -239,7 +243,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
 
 def run():
-    epochs = 50
+    epochs = 30
     img_width = 150
     img_height = img_width
 

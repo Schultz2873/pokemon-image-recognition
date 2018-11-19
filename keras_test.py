@@ -5,6 +5,10 @@ from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import backend as kb
 from keras.models import load_model
 from keras.preprocessing import image
+
+# metrics
+from sklearn import metrics
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -24,8 +28,18 @@ def save_model(model, file_name: str = None):
     model.save(model_directory + file_name + extension)
 
 
-def show_predictions(model: str, images_path: str, width, height):
-    model: Sequential = load_model(model)
+def _get_model(model):
+    if type(model) == str:
+        return load_model(model)
+    elif type(model) == Sequential:
+        return model
+
+
+def show_predictions(model, images_path: str, width, height):
+    # if model is file path string, load keras model from file path
+    model = _get_model(model)
+
+    # run predictions on model
     model.summary()
     images = []
     files = file_util.get_files(images_path)
@@ -54,6 +68,31 @@ def show_predictions(model: str, images_path: str, width, height):
             print('pikachu')
         elif class_value == 4:
             print('squirtle')
+
+
+def model_metrics(model, test_directory: str, img_width: int, img_height: int):
+    model = _get_model(model)
+
+    test_generator = ImageDataGenerator()
+    test_data_generator = test_generator.flow_from_directory(
+        test_directory,
+        target_size=(img_width, img_height),
+        batch_size=16,
+        shuffle=False)
+    # test_steps_per_epoch = np.math.ceil(test_data_generator.samples / test_data_generator.batch_size)
+    test_steps_per_epoch = np.math.ceil(test_data_generator.samples / test_data_generator.batch_size)
+
+    predictions = model.predict_generator(test_data_generator, steps=test_steps_per_epoch)
+    # Get most likely class
+    predicted_classes = np.argmax(predictions, axis=1)
+
+    true_classes = test_data_generator.classes
+    class_labels = list(test_data_generator.class_indices.keys())
+
+    report = metrics.classification_report(true_classes, predicted_classes, target_names=class_labels)
+    print(report)
+
+    return report
 
 
 def show_plot(history, file_name: str = None):
@@ -93,21 +132,21 @@ def show_plot(history, file_name: str = None):
     plt.show()
 
 
-def test():
+def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     training_directory = 'datasets/pokemon/train'
     validation_directory = 'datasets/pokemon/validate'
 
     num_classes = file_util.count_subdirectories(training_directory)
     class_mode = 'categorical'
 
-    img_width, img_height = 50, 50
+    # img_width, img_height = 100, 100
     channels = 3
 
     inner_layers = 3
     inner_layer_filters = 16
 
     steps_per_epoch = 2000
-    epochs = 1
+    # epochs = 2
     validation_steps = 800
     batch_size = 16
 
@@ -142,11 +181,11 @@ def test():
     # this is the augmentation configuration we will use for training
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
-        rotation_range=40,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        shear_range=0.2,
-        zoom_range=0.2,
+        rotation_range=90,
+        width_shift_range=0.3,
+        height_shift_range=0.3,
+        # shear_range=0.2,
+        zoom_range=0.3,
         horizontal_flip=True,
         fill_mode='nearest')
 
@@ -158,7 +197,7 @@ def test():
         batch_size=batch_size,
         class_mode=class_mode)
 
-    print('train_generator class indices:\n', train_generator.class_indices)
+    print('train_generator class indices:\n', train_generator.class_indices, '\n')
 
     validation_generator = test_datagen.flow_from_directory(
         validation_directory,
@@ -166,7 +205,7 @@ def test():
         batch_size=batch_size,
         class_mode=class_mode)
 
-    print('validation_generator class indices:\n', validation_generator.class_indices)
+    print('validation_generator class indices:\n', validation_generator.class_indices, '\n')
 
     history = model.fit_generator(
         train_generator,
@@ -178,14 +217,29 @@ def test():
     print(history.history.keys())
 
     # file naming strings
-    info_string = str(epochs) + '-epochs-' + str(inner_layers) + '-inner_layers-' + str(
-        inner_layer_filters) + '-filters-'
+    info_string = str(img_width) + 'x' + str(img_height) + '_' + str(epochs) + '-epochs-' + str(
+        inner_layers) + '-inner_layers-' + str(inner_layer_filters) + '-filters-'
+
     now_string = file_util.date_string_now()
 
     # save and show data
-    show_plot(history, info_string + now_string)
-    save_model(model, info_string + now_string)
+    if show:
+        show_plot(history, info_string + now_string)
+
+    if save:
+        save_model(model, info_string + now_string)
+
+    return model
 
 
-# test()
-show_predictions('keras_model/1-epochs-3-inner_layers-16-filters-2018-11-08 12-00-37.016254.h5', 'examples', 50, 50)
+def run():
+    epochs = 15
+    img_width = 100
+    img_height = 100
+
+    model = train(epochs, img_width, img_height)
+    show_predictions(model, 'examples', img_width, img_height)
+    model_metrics(model, 'datasets/pokemon/validate', img_width, img_height)
+
+
+run()

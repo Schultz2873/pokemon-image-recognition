@@ -1,7 +1,9 @@
 import os
 from os.path import isfile, join
 from shutil import copyfile
+from PIL import Image
 import random
+
 # for naming generated files
 import datetime
 
@@ -89,6 +91,16 @@ def date_string_now():
     now_string = now_string.replace(':', '-')
 
     return now_string
+
+
+def resize_images(directory, width, height):
+    files = os.listdir(directory)
+
+    for i in range(0, len(files)):
+        image_path = directory + '/' + files[i]
+        image = Image.open(image_path)
+        new_image = image.resize((width, height))
+        new_image.save(image_path)
 
 # split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/squirtle',
 #                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/squirtle',

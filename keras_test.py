@@ -143,7 +143,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     channels = 3
 
     inner_layers = 3
-    inner_layer_filters = 32
+    inner_layer_filters = 64
 
     steps_per_epoch = 2000
     # epochs = 2
@@ -233,7 +233,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
 
 def run():
-    epochs = 20
+    epochs = 15
     img_width = 100
     img_height = 100
 

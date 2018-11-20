@@ -134,25 +134,15 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     validation_directory = 'datasets/pokemon/validate'
 
     num_classes = file_util.count_subdirectories(training_directory)
-    num_training_files = file_util.num_files('C:/Users/Colom/PycharmProjects/pokemon-repo/datasets/pokemon/train')
-    num_validation_files = file_util.num_files('C:/Users/Colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate')
-    print('num training files:', num_training_files)
     class_mode = 'categorical'
 
     # img_width, img_height = 100, 100
     channels = 3
 
-    inner_layers = 4
-    inner_layer_filters = 16
+    inner_layers = 3
+    inner_layer_filters = 50
 
     batch_size = 32
-    steps_per_epoch = math.ceil(num_training_files / batch_size)
-    # steps_per_epoch = num_training_files // batch_size
-    # steps_per_epoch = 2000 // batch_size
-    validation_steps = math.ceil(num_training_files / batch_size)
-    # validation_steps = math.ceil(num_validation_files / batch_size)
-    # validation_steps = num_validation_files // batch_size
-    # validation_steps = 800 // batch_size
 
     kernel_size = (3, 3)
 
@@ -205,15 +195,14 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
         batch_size=batch_size,
         class_mode=class_mode)
 
-    print('train_generator class indices:\n', train_generator.class_indices, '\n')
-
     validation_generator = test_datagen.flow_from_directory(
         validation_directory,
         target_size=(img_width, img_height),
         batch_size=batch_size,
         class_mode=class_mode)
 
-    print('validation_generator class indices:\n', validation_generator.class_indices, '\n')
+    steps_per_epoch = math.ceil(train_generator.samples / batch_size)
+    validation_steps = math.ceil(validation_generator.samples / batch_size)
 
     history = model.fit_generator(
         train_generator,
@@ -221,8 +210,6 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
         epochs=epochs,
         validation_data=validation_generator,
         validation_steps=validation_steps)
-
-    print(history.history.keys())
 
     # file naming strings
     now_string = file_util.date_string_now()
@@ -244,7 +231,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
 def run():
     epochs = 30
-    img_width = 150
+    img_width = 100
     img_height = img_width
 
     model = train(epochs, img_width, img_height)

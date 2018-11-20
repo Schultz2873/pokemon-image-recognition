@@ -109,7 +109,45 @@ def resize_images(directory, width, height):
         new_image = image.resize((width, height))
         new_image.save(image_path)
 
-# split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/squirtle',
-#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/squirtle',
-#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/squirtle',
+
+def change_image_type(image_path: str, extension: str, overwrite: bool = True):
+    if os.path.isfile(image_path):
+
+        img = Image.open(image_path)
+
+        # only change format if extension is different from file's extension
+        if img.format != extension:
+            period_index = image_path.index('.')
+
+            # if has transparency, convert to RGB
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+
+            # save image
+            img.save(image_path[:period_index + 1] + extension)
+
+            # if overwrite enabled, delete old file
+            if overwrite:
+                os.remove(image_path)
+
+            img.close()
+            return True
+        img.close()
+
+    else:
+        print(image_path + ' is not a file')
+    return False
+
+
+def directory_change_image_type(directory: str, extension: str, overwrite: bool = True):
+    for directory_name, subdirectory_list, file_list in os.walk(directory):
+        for file_name in file_list:
+            change_image_type(directory_name + '/' + file_name, extension, overwrite)
+
+# name = 'squirtle'
+# split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/' + name,
+#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/' + name,
+#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/' + name,
 #                 .7)
+
+# directory_change_image_type('C:/Users/colom/PycharmProjects/pokemon-repo/datasets', 'jpg')

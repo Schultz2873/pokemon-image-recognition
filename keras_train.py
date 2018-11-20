@@ -136,15 +136,14 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     num_classes = file_util.count_subdirectories(training_directory)
     class_mode = 'categorical'
 
-    # img_width, img_height = 100, 100
     channels = 3
+    kernel_size = (3, 3)
 
     inner_layers = 3
-    inner_layer_filters = 50
+    inner_layer_filters = 32
+    dropout = .2
 
     batch_size = 32
-
-    kernel_size = (3, 3)
 
     if kb.image_data_format() == 'channels_first':
         input_shape = (channels, img_width, img_height)
@@ -154,26 +153,36 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     pool_size = (2, 2)
 
     model = Sequential()
+    # model.add(Conv2D(64, kernel_size, activation='relu', input_shape=input_shape))
+    # model.add(Dropout(dropout))
+    # model.add(MaxPooling2D(pool_size=pool_size))
 
-    model.add(Conv2D(64, kernel_size, input_shape=input_shape))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=pool_size))
-
+    filters = inner_layer_filters
     for i in range(inner_layers):
-        model.add(Conv2D(inner_layer_filters, kernel_size))
-        model.add(Activation('relu'))
+        print(filters)
+        # first layer
+        if i == 0:
+            model.add(Conv2D(filters, kernel_size, activation='relu', input_shape=input_shape))
+        # other layers
+        else:
+            model.add(Conv2D(filters, kernel_size, activation='relu'))
+
+        model.add(Dropout(dropout))
+        model.add(Conv2D(filters, kernel_size, activation='relu'))
         model.add(MaxPooling2D(pool_size=pool_size))
 
+        # filters *= 2
+
     model.add(Flatten())
-    model.add(Dense(64))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.25))
-    model.add(Dense(num_classes))
-    model.add(Activation('softmax'))
+    model.add(Dropout(dropout))
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(dropout))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dropout(dropout))
+    model.add(Dense(num_classes, activation='softmax'))
 
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
-                  # optimizer='adam',
                   metrics=['accuracy'])
 
     # this is the augmentation configuration we will use for training
@@ -219,10 +228,11 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
     file_string = now_string + '_' + info_string
 
-    # save and show data
+    # show data
     if show:
         show_plot(history, file_string)
 
+    # save data
     if save:
         save_model(model, file_string)
 
@@ -239,4 +249,13 @@ def run():
     model_metrics(model, 'datasets/pokemon/validate', img_width, img_height)
 
 
+def evaluate(model, test_directory, img_width, img_height):
+    if type(model) == str:
+        model = load_model(model)
+
+    model_metrics(model, test_directory, img_width, img_height)
+
+
 run()
+# evaluate('keras_model/2018-11-19 22-19-16.839323_100x100_30-epochs_3-inner_layers_50-filters_32-batch_size.h5',
+#          'datasets/pokemon/validate', 100, 100)

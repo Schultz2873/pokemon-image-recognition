@@ -137,45 +137,35 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     class_mode = 'categorical'
 
     channels = 3
-    kernel_size = (3, 3)
+    kernel_size = (5, 5)
+    pool_size = (3, 3)
 
     batch_size = 16
 
-    inner_layers = 2
-    inner_layer_filters = 32
-    dropout = .25
+    inner_layers = 1
+    inner_layer_filters = 50
+    dropout = .5
 
     if kb.image_data_format() == 'channels_first':
         input_shape = (channels, img_width, img_height)
     else:
         input_shape = (img_width, img_height, channels)
 
-    pool_size = (2, 2)
-
     model = Sequential()
-    # model.add(Conv2D(64, kernel_size, activation='relu', input_shape=input_shape))
-    # model.add(Dropout(dropout))
-    # model.add(MaxPooling2D(pool_size=pool_size))
 
     filters = inner_layer_filters
-    for i in range(inner_layers):
-        print(filters)
-        # first layer
-        if i == 0:
-            model.add(Conv2D(filters, kernel_size, activation='relu', input_shape=input_shape))
-        # other layers
-        else:
-            model.add(Conv2D(filters, kernel_size, activation='relu'))
 
-        # model.add(Dropout(dropout))
+    # input layer
+    model.add(Conv2D(filters, kernel_size, activation='relu', input_shape=input_shape))
+
+    for i in range(inner_layers):
         model.add(Conv2D(filters, kernel_size, activation='relu'))
         model.add(MaxPooling2D(pool_size=pool_size))
 
         # filters *= 2
 
     model.add(Flatten())
-    # model.add(Dropout(dropout))
-    model.add(Dense(64, activation='relu'))
+    model.add(Dense(128, activation='relu'))
     model.add(Dropout(dropout))
     model.add(Dense(num_classes, activation='softmax'))
 
@@ -238,7 +228,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
 
 def run():
-    epochs = 20
+    epochs = 50
     img_width = 100
     img_height = img_width
 

@@ -139,11 +139,11 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     channels = 3
     kernel_size = (3, 3)
 
-    inner_layers = 3
-    inner_layer_filters = 32
-    dropout = .2
+    batch_size = 16
 
-    batch_size = 32
+    inner_layers = 2
+    inner_layer_filters = 32
+    dropout = .25
 
     if kb.image_data_format() == 'channels_first':
         input_shape = (channels, img_width, img_height)
@@ -167,17 +167,15 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
         else:
             model.add(Conv2D(filters, kernel_size, activation='relu'))
 
-        model.add(Dropout(dropout))
+        # model.add(Dropout(dropout))
         model.add(Conv2D(filters, kernel_size, activation='relu'))
         model.add(MaxPooling2D(pool_size=pool_size))
 
         # filters *= 2
 
     model.add(Flatten())
-    model.add(Dropout(dropout))
-    model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(dropout))
-    model.add(Dense(512, activation='relu'))
+    # model.add(Dropout(dropout))
+    model.add(Dense(64, activation='relu'))
     model.add(Dropout(dropout))
     model.add(Dense(num_classes, activation='softmax'))
 
@@ -191,7 +189,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
         rotation_range=90,
         width_shift_range=0.3,
         height_shift_range=0.3,
-        # shear_range=0.2,
+        shear_range=0.15,
         zoom_range=0.3,
         horizontal_flip=True,
         fill_mode='nearest')
@@ -240,7 +238,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
 
 def run():
-    epochs = 30
+    epochs = 20
     img_width = 100
     img_height = img_width
 

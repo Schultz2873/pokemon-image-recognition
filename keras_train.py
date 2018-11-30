@@ -132,8 +132,8 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
     batch_size = 16
 
-    inner_layers = 1
-    inner_layer_filters = 50
+    hidden_layers = 2
+    hidden_layer_filters = 50
 
     dropout = .2
 
@@ -144,12 +144,13 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
     model = Sequential()
 
-    filters = inner_layer_filters
+    filters = hidden_layer_filters
 
     # input layer
     model.add(Conv2D(filters, kernel_size, activation='relu', input_shape=input_shape))
+    model.add(MaxPooling2D(pool_size=pool_size))
 
-    for i in range(inner_layers):
+    for i in range(hidden_layers):
         model.add(Conv2D(filters, kernel_size, activation='relu'))
         model.add(MaxPooling2D(pool_size=pool_size))
 
@@ -192,6 +193,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     steps_per_epoch = math.ceil(train_generator.samples / batch_size)
     validation_steps = math.ceil(validation_generator.samples / batch_size)
 
+    # train
     history = model.fit_generator(
         train_generator,
         steps_per_epoch=steps_per_epoch,
@@ -203,7 +205,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     now_string = file_util.date_string_now()
 
     info_string = str(img_width) + 'x' + str(img_height) + '_' + str(epochs) + '-epochs_' + str(
-        inner_layers) + '-inner_layers_' + str(inner_layer_filters) + '-filters_' + str(batch_size) + '-batch_size'
+        hidden_layers) + '-inner_layers_' + str(hidden_layer_filters) + '-filters_' + str(batch_size) + '-batch_size'
 
     file_string = now_string + '_' + info_string
 
@@ -219,7 +221,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
 
 def run():
-    epochs = 25
+    epochs = 45
     img_width = 100
     img_height = img_width
 
@@ -236,5 +238,3 @@ def evaluate(model, test_directory, img_width, img_height):
 
 
 run()
-# evaluate('keras_model/2018-11-19 22-19-16.839323_100x100_30-epochs_3-inner_layers_50-filters_32-batch_size.h5',
-#          'datasets/pokemon/validate', 100, 100)

@@ -33,6 +33,21 @@ def _get_model(model):
         return model
 
 
+def filters_dropout_compensation(min_active_filters, dropout):
+    """
+    Calculates the minimum number of active filters, adjusted for dropout. For example, if 50 active filters are
+    required and a dropout value of .2 is used, the value 63 will be returned. (When the 63 filters are set, 20% will
+    be turned off due to dropout).
+    :param min_active_filters: The minimum number of active filters
+    :param dropout: A dropout value
+    :return: Returns a greater filter value to ensure the minimum number of filters are always active.
+    """
+    if dropout != 1:
+        return int(math.ceil(min_active_filters / (1 - dropout)))
+    else:
+        return 0
+
+
 def show_predictions(model, images_path: str, width, height):
     # if model is file path string, load keras model from file path
     model = _get_model(model)
@@ -49,10 +64,9 @@ def show_predictions(model, images_path: str, width, height):
         images.append(img)
 
     images = np.vstack(images)
-    predictions = model.predict(images)
+    # predictions = model.predict(images)
     classes = model.predict_classes(images)
-    print('predictions:\n', predictions)
-    print('prediction indices:\n', classes)
+    print('prediction indices:')
     for class_value in classes:
         print(str(class_value))
 
@@ -64,7 +78,7 @@ def model_metrics(model, test_directory: str, img_width: int, img_height: int):
     test_data_generator = test_generator.flow_from_directory(
         test_directory,
         target_size=(img_width, img_height),
-        batch_size=16,
+        batch_size=32,
         shuffle=False)
     # test_steps_per_epoch = np.math.ceil(test_data_generator.samples / test_data_generator.batch_size)
     test_steps_per_epoch = np.math.ceil(test_data_generator.samples / test_data_generator.batch_size)
@@ -126,17 +140,29 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     num_classes = file_util.count_subdirectories(training_directory)
     class_mode = 'categorical'
 
+    batch_size = 32
+
     channels = 3
     kernel_size = (3, 3)
     pool_size = (2, 2)
 
-    batch_size = 16
-
-    hidden_layers = 2
-    hidden_layer_filters = 50
+    conv_2d_layers = 2
 
     dropout = .2
 
+    base_conv_2d_filters = 50
+
+    # ensure minimum number of active filters (adjust filters for dropout)
+    conv_2d_filters = filters_dropout_compensation(base_conv_2d_filters, dropout)
+    print('conv_2d_filters:', conv_2d_filters)
+
+    base_dense_filters = 512
+
+    # ensure minimum number of active filters (adjust filters for dropout)
+    dense_filters = filters_dropout_compensation(base_dense_filters, dropout)
+    print('dense_filters:', dense_filters, end='\n\n')
+
+    # set input shape
     if kb.image_data_format() == 'channels_first':
         input_shape = (channels, img_width, img_height)
     else:
@@ -144,20 +170,19 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
     model = Sequential()
 
-    filters = hidden_layer_filters
-
     # input layer
-    model.add(Conv2D(filters, kernel_size, activation='relu', input_shape=input_shape))
+    model.add(Conv2D(conv_2d_filters, kernel_size, activation='relu', input_shape=input_shape))
     model.add(MaxPooling2D(pool_size=pool_size))
 
-    for i in range(hidden_layers):
-        model.add(Conv2D(filters, kernel_size, activation='relu'))
+    for i in range(conv_2d_layers):
+        model.add(Conv2D(conv_2d_filters, kernel_size, activation='relu'))
         model.add(MaxPooling2D(pool_size=pool_size))
 
-        # filters *= 2
+        # TODO consider for removal
+        # model.add(Dropout(dropout))
 
     model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
+    model.add(Dense(dense_filters, activation='relu'))
     model.add(Dropout(dropout))
     model.add(Dense(num_classes, activation='softmax'))
 
@@ -168,11 +193,11 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     # this is the augmentation configuration we will use for training
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
-        rotation_range=90,
-        width_shift_range=0.3,
-        height_shift_range=0.3,
-        shear_range=0.15,
-        zoom_range=0.3,
+        rotation_range=30,
+        width_shift_range=0.25,
+        height_shift_range=0.25,
+        shear_range=0.1,
+        # zoom_range=0.1,
         horizontal_flip=True,
         fill_mode='nearest')
 
@@ -205,7 +230,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     now_string = file_util.date_string_now()
 
     info_string = str(img_width) + 'x' + str(img_height) + '_' + str(epochs) + '-epochs_' + str(
-        hidden_layers) + '-inner_layers_' + str(hidden_layer_filters) + '-filters_' + str(batch_size) + '-batch_size'
+        conv_2d_layers) + '-inner_layers_' + str(conv_2d_filters) + '-filters_' + str(dropout) + '-dropout'
 
     file_string = now_string + '_' + info_string
 
@@ -228,13 +253,6 @@ def run():
     model = train(epochs, img_width, img_height)
     show_predictions(model, 'examples', img_width, img_height)
     model_metrics(model, 'datasets/pokemon/validate', img_width, img_height)
-
-
-def evaluate(model, test_directory, img_width, img_height):
-    if type(model) == str:
-        model = load_model(model)
-
-    model_metrics(model, test_directory, img_width, img_height)
 
 
 run()

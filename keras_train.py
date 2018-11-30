@@ -221,7 +221,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
 
 def run():
-    epochs = 45
+    epochs = 60
     img_width = 100
     img_height = img_width
 

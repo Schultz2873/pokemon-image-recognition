@@ -54,17 +54,7 @@ def show_predictions(model, images_path: str, width, height):
     print('predictions:\n', predictions)
     print('prediction indices:\n', classes)
     for class_value in classes:
-        print(str(class_value) + ': ', end='')
-        if class_value == 0:
-            print('bulbasaur')
-        elif class_value == 1:
-            print('charmander')
-        elif class_value == 2:
-            print('mewtwo')
-        elif class_value == 3:
-            print('pikachu')
-        elif class_value == 4:
-            print('squirtle')
+        print(str(class_value))
 
 
 def model_metrics(model, test_directory: str, img_width: int, img_height: int):
@@ -137,14 +127,15 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     class_mode = 'categorical'
 
     channels = 3
-    kernel_size = (5, 5)
-    pool_size = (3, 3)
+    kernel_size = (3, 3)
+    pool_size = (2, 2)
 
     batch_size = 16
 
     inner_layers = 1
     inner_layer_filters = 50
-    dropout = .5
+
+    dropout = .2
 
     if kb.image_data_format() == 'channels_first':
         input_shape = (channels, img_width, img_height)
@@ -228,7 +219,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
 
 def run():
-    epochs = 50
+    epochs = 25
     img_width = 100
     img_height = img_width
 

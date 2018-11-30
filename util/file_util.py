@@ -117,6 +117,7 @@ def change_image_type(image_path: str, extension: str, overwrite: bool = True):
 
         # only change format if extension is different from file's extension
         if img.format != extension:
+            print(img)
             period_index = image_path.index('.')
 
             # if has transparency, convert to RGB
@@ -144,10 +145,12 @@ def directory_change_image_type(directory: str, extension: str, overwrite: bool 
         for file_name in file_list:
             change_image_type(directory_name + '/' + file_name, extension, overwrite)
 
-# name = 'squirtle'
-# split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/' + name,
-#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/' + name,
-#                 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/' + name,
-#                 .7)
 
+# names = ['bulbasaur', 'charmander', 'pikachu', 'squirtle']
+# for name in names:
+#     split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/' + name,
+#                     'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/' + name,
+#                     'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/' + name,
+#                     .7)
+#
 # directory_change_image_type('C:/Users/colom/PycharmProjects/pokemon-repo/datasets', 'jpg')

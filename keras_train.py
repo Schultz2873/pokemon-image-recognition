@@ -178,9 +178,6 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
         model.add(Conv2D(conv_2d_filters, kernel_size, activation='relu'))
         model.add(MaxPooling2D(pool_size=pool_size))
 
-        # TODO consider for removal
-        # model.add(Dropout(dropout))
-
     model.add(Flatten())
     model.add(Dense(dense_filters, activation='relu'))
     model.add(Dropout(dropout))
@@ -246,7 +243,7 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
 
 def run():
-    epochs = 60
+    epochs = 35
     img_width = 100
     img_height = img_width
 

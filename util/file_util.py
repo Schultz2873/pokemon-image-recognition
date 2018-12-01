@@ -1,5 +1,6 @@
 import os
 from os.path import isfile, join
+import shutil
 from shutil import copyfile
 from PIL import Image
 import random
@@ -46,8 +47,6 @@ def split_directory(source_path: str, destination_path1: str, destination_path2:
         file_names = [f for f in os.listdir(source_path) if isfile(join(source_path, f))]
         destination1_file_names = []
 
-        print(len(file_names))
-
         # iterate through files, popping selected files from file_names into destination1_file_names
         # file_names becomes remainder file list
         i = 0
@@ -63,9 +62,6 @@ def split_directory(source_path: str, destination_path1: str, destination_path2:
             # pop file from file_names into destination1_file_names
             destination1_file_names.append(file_names.pop(index))
             i += 1
-
-        print(len(destination1_file_names))
-        print(len(file_names))
 
         # copy or move files in destination1_file_names to destination_path1
         for i in range(len(destination1_file_names)):
@@ -112,33 +108,37 @@ def resize_images(directory, width, height):
         new_image.save(image_path)
 
 
-def change_image_type(image_path: str, extension: str, overwrite: bool = True):
+def change_image_type(image_path: str, extension: str, overwrite: bool = True, handle_palette: bool = True):
     if os.path.isfile(image_path):
+        extension = '.' + extension
+        # get file root and extension
+        img_root, img_extension = os.path.splitext(image_path)
 
+        # if img_extension != extension:
+        print('modifying file:', image_path)
         img = Image.open(image_path)
+        print(img)
 
-        # only change format if extension is different from file's extension
-        if img.format != extension:
-            print(img)
-            period_index = image_path.index('.')
+        is_mode_converted = False
 
-            # if has transparency, convert to RGB
-            if img.mode in ("RGBA", "P"):
-                img = img.convert("RGB")
+        new_image_path = img_root + extension
 
-            # save image
-            img.save(image_path[:period_index + 1] + extension)
+        # if has transparency, convert to RGB
+        if handle_palette and img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+            is_mode_converted = True
 
-            # if overwrite enabled, delete old file
+        if img_extension != extension or is_mode_converted:
+
+            img.save(new_image_path)
+            img.close()
+
             if overwrite:
                 os.remove(image_path)
 
-            img.close()
             return True
         img.close()
 
-    else:
-        print(image_path + ' is not a file')
     return False
 
 
@@ -146,13 +146,61 @@ def directory_change_image_type(directory: str, extension: str, overwrite: bool 
     for directory_name, subdirectory_list, file_list in os.walk(directory):
         for file_name in file_list:
             change_image_type(directory_name + '/' + file_name, extension, overwrite)
+    print('image types changed')
 
 
-# names = ['bulbasaur', 'charmander', 'pikachu', 'squirtle']
-# for name in names:
-#     split_directory('C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset/' + name,
-#                     'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/train/' + name,
-#                     'C:/Users/colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate/' + name,
-#                     .7)
-#
-# directory_change_image_type('C:/Users/colom/PycharmProjects/pokemon-repo/datasets', 'jpg')
+def build_dataset(core_dataset_directory: str, base_directory: str, dataset_name: str, split_percentage: float,
+                  image_extension: str = None, class_list: list = None, overwrite_existing: bool = False):
+    # if core dataset path is a directory
+    if os.path.isdir(core_dataset_directory):
+
+        dataset_name_directory = os.path.join(base_directory, dataset_name)
+
+        # if overwrite enabled, overwrite existing directory
+        if overwrite_existing and os.path.isdir(dataset_name_directory):
+            # delete directory
+            shutil.rmtree(dataset_name_directory)
+
+        # if dataset directory does not exist
+        if not os.path.exists(dataset_name_directory):
+
+            train_directory = os.path.join(dataset_name_directory, 'train')
+            validate_directory = os.path.join(dataset_name_directory, 'validate')
+
+            # create directories
+            os.mkdir(dataset_name_directory)
+            os.mkdir(train_directory)
+            os.mkdir(validate_directory)
+
+            classes = os.listdir(core_dataset_directory)
+
+            # iterate over class directories in core dataset
+            for class_name in classes:
+
+                if (class_list is not None and class_name in class_list) or class_list is None:
+                    dataset_class_name_directory = os.path.join(core_dataset_directory, class_name)
+                    class_train_directory = os.path.join(train_directory, class_name)
+                    class_validate_directory = os.path.join(validate_directory, class_name)
+
+                    # split contents of core dataset class folder into train and validate class folders
+                    split_directory(dataset_class_name_directory, class_train_directory, class_validate_directory,
+                                    split_percentage)
+
+            if image_extension is not None:
+                directory_change_image_type(base_directory, image_extension)
+
+
+def create_train_validate():
+    core_dataset_directory = 'C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset'
+    base_directory = 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets'
+    dataset_name = 'pokemon'
+    split_percentage = .7
+    image_extension = 'jpg'
+    class_list = ['bulbasaur', 'charmander', 'pikachu', 'squirtle']
+    # class_list = None
+    overwrite_existing = True
+
+    build_dataset(core_dataset_directory, base_directory, dataset_name, split_percentage, image_extension,
+                  class_list=class_list, overwrite_existing=overwrite_existing)
+
+# create_train_validate()

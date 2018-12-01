@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 # for file management
 import util.file_util as file_util
 import math
+import os
 
 
 def save_model(model, file_name: str = None):
@@ -33,6 +34,10 @@ def _get_model(model):
         return model
 
 
+def _calc_steps_per_epoch(samples: int, batch_size: int):
+    return math.ceil(samples / batch_size)
+
+
 def filters_dropout_compensation(min_active_filters, dropout):
     """
     Calculates the minimum number of active filters, adjusted for dropout. For example, if 50 active filters are
@@ -48,17 +53,17 @@ def filters_dropout_compensation(min_active_filters, dropout):
         return 0
 
 
-def show_predictions(model, images_path: str, width, height):
+def show_predictions(model, img_directory: str, width, height):
     # if model is file path string, load keras model from file path
+    print('directory:', img_directory)
     model = _get_model(model)
 
     # run predictions on model
     images = []
-    files = file_util.get_files(images_path)
-    print(files)
+    files = file_util.get_files(img_directory)
 
     for file in files:
-        img = image.load_img(images_path + '/' + file, target_size=(width, height))
+        img = image.load_img(os.path.join(img_directory, file), target_size=(width, height))
         img = image.img_to_array(img)
         img = np.expand_dims(img, axis=0)
         images.append(img)
@@ -66,9 +71,10 @@ def show_predictions(model, images_path: str, width, height):
     images = np.vstack(images)
     # predictions = model.predict(images)
     classes = model.predict_classes(images)
-    print('prediction indices:')
+    i = 0
     for class_value in classes:
-        print(str(class_value))
+        print(files[i] + ': predicted ' + str(class_value))
+        i += 1
 
 
 def model_metrics(model, test_directory: str, img_width: int, img_height: int):
@@ -78,10 +84,12 @@ def model_metrics(model, test_directory: str, img_width: int, img_height: int):
     test_data_generator = test_generator.flow_from_directory(
         test_directory,
         target_size=(img_width, img_height),
-        batch_size=32,
+        batch_size=1,
+        class_mode=None,
         shuffle=False)
     # test_steps_per_epoch = np.math.ceil(test_data_generator.samples / test_data_generator.batch_size)
-    test_steps_per_epoch = np.math.ceil(test_data_generator.samples / test_data_generator.batch_size)
+    # test_steps_per_epoch = np.math.ceil(test_data_generator.samples / test_data_generator.batch_size)
+    test_steps_per_epoch = _calc_steps_per_epoch(test_data_generator.samples, test_data_generator.batch_size)
 
     predictions = model.predict_generator(test_data_generator, steps=test_steps_per_epoch)
     # Get most likely class
@@ -102,7 +110,7 @@ def show_plot(history, file_name: str = None):
     extension = '.png'
 
     fig_size = [8, 6]
-    line_width = 3.0
+    line_width = 2.0
     font_size = 16
     legend_font_size = 18
 
@@ -133,33 +141,30 @@ def show_plot(history, file_name: str = None):
     plt.show()
 
 
-def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
-    training_directory = 'datasets/pokemon/train'
-    validation_directory = 'datasets/pokemon/validate'
-
-    num_classes = file_util.count_subdirectories(training_directory)
+def train(train_directory, validate_directory, img_width, img_height, save: bool = True, show: bool = True):
+    num_classes = file_util.count_subdirectories(train_directory)
     class_mode = 'categorical'
 
     batch_size = 32
+    epochs = 40
 
     channels = 3
     kernel_size = (3, 3)
     pool_size = (2, 2)
 
-    conv_2d_layers = 2
+    dropout = .5
 
-    dropout = .2
-
-    base_conv_2d_filters = 50
+    conv_2d_layers = 3
+    conv_2d_filters = 32
 
     # ensure minimum number of active filters (adjust filters for dropout)
-    conv_2d_filters = filters_dropout_compensation(base_conv_2d_filters, dropout)
+    # conv_2d_filters = filters_dropout_compensation(conv_2d_filters, dropout)
     print('conv_2d_filters:', conv_2d_filters)
 
-    base_dense_filters = 512
+    dense_filters = 64
 
     # ensure minimum number of active filters (adjust filters for dropout)
-    dense_filters = filters_dropout_compensation(base_dense_filters, dropout)
+    # dense_filters = filters_dropout_compensation(dense_filters, dropout)
     print('dense_filters:', dense_filters, end='\n\n')
 
     # set input shape
@@ -174,10 +179,12 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     model.add(Conv2D(conv_2d_filters, kernel_size, activation='relu', input_shape=input_shape))
     model.add(MaxPooling2D(pool_size=pool_size))
 
+    # add conv2d layers
     for i in range(conv_2d_layers):
         model.add(Conv2D(conv_2d_filters, kernel_size, activation='relu'))
         model.add(MaxPooling2D(pool_size=pool_size))
 
+    # add flatten and dense layers
     model.add(Flatten())
     model.add(Dense(dense_filters, activation='relu'))
     model.add(Dropout(dropout))
@@ -191,29 +198,30 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
         rotation_range=30,
-        width_shift_range=0.25,
-        height_shift_range=0.25,
-        shear_range=0.1,
-        # zoom_range=0.1,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
         horizontal_flip=True,
-        fill_mode='nearest')
+        fill_mode='nearest'
+    )
 
-    test_datagen = ImageDataGenerator(rescale=1. / 255)
+    validate_datagen = ImageDataGenerator(rescale=1. / 255)
 
     train_generator = train_datagen.flow_from_directory(
-        training_directory,
+        train_directory,
         target_size=(img_width, img_height),
         batch_size=batch_size,
         class_mode=class_mode)
 
-    validation_generator = test_datagen.flow_from_directory(
-        validation_directory,
+    validation_generator = validate_datagen.flow_from_directory(
+        validate_directory,
         target_size=(img_width, img_height),
         batch_size=batch_size,
         class_mode=class_mode)
 
-    steps_per_epoch = math.ceil(train_generator.samples / batch_size)
-    validation_steps = math.ceil(validation_generator.samples / batch_size)
+    steps_per_epoch = _calc_steps_per_epoch(train_generator.samples, batch_size)
+    validation_steps = _calc_steps_per_epoch(validation_generator.samples, batch_size)
 
     # train
     history = model.fit_generator(
@@ -243,13 +251,18 @@ def train(epochs, img_width, img_height, save: bool = True, show: bool = True):
 
 
 def run():
-    epochs = 35
+    train_directory = 'datasets/pokemon/train'
+    validate_directory = 'datasets/pokemon/validate'
+
     img_width = 100
     img_height = img_width
 
-    model = train(epochs, img_width, img_height)
+    model = train(train_directory, validate_directory, img_width, img_height)
     show_predictions(model, 'examples', img_width, img_height)
-    model_metrics(model, 'datasets/pokemon/validate', img_width, img_height)
+    model_metrics(model, validate_directory, img_width, img_height)
 
 
 run()
+# show_predictions('C:/Users\Colom\PycharmProjects\pokemon-repo\keras_model/2018-12-01 15-40-33.655437_100x100_20'
+#                  + '-epochs_3-inner_layers_32-filters_0.25-dropout.h5', 'datasets/pokemon/validate/squirtle',
+#                  100, 100)

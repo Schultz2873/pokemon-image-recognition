@@ -83,12 +83,14 @@ def _copy_or_move(source_path, destination_path, file_names, index, is_copy):
 
 
 def count_subdirectories(directory):
-    count = 0
-    directory_list = os.listdir(directory)
-    for name in directory_list:
-        if os.path.isdir(directory + '/' + name):
-            count += 1
-    return count
+    # count = 0
+    # directory_list = os.listdir(directory)
+    # for name in directory_list:
+    #     if os.path.isdir(directory + '/' + name):
+    #         count += 1
+    # return count
+
+    return len(os.listdir(directory))
 
 
 def date_string_now():
@@ -194,7 +196,7 @@ def create_train_validate():
     core_dataset_directory = 'C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset'
     base_directory = 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets'
     dataset_name = 'pokemon'
-    split_percentage = .7
+    split_percentage = .75
     image_extension = 'jpg'
     class_list = ['bulbasaur', 'charmander', 'pikachu', 'squirtle']
     # class_list = None
@@ -204,4 +206,4 @@ def create_train_validate():
                   class_list=class_list, overwrite_existing=overwrite_existing)
 
 
-create_train_validate()
+# create_train_validate()

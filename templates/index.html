@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<head>
+    {% extends "bootstrap/base.html" %}
+    <meta charset="UTF-8">
+
+    {% block title %}Pokemon Image Detection {% endblock %}
+
+     {% block styles %}
+    {{super()}}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='custom.css') }}">
+    {% endblock %}
+
+</head>
+<body>
+{% block body %}
+<div class="container-fluid">
+    <h1>Pokemon Uploads</h1>
+</div>
+{% endblock %}
+
+</body>
+</html>

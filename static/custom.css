@@ -1,3 +1,11 @@
-h1 {
-    color: blue;
+body {
+    background-color: ghostwhite;
+}
+
+.navbar {
+    background-color: red;
+}
+
+strong {
+    color: white;
 }

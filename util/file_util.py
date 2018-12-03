@@ -35,6 +35,8 @@ def split_directory(source_path: str, destination_path1: str, destination_path2:
     """
     if 0 <= percentage <= 1:
 
+        print('splitting ' + source_path + ' with ' + str(percentage) + ' split value')
+
         # create directory if not exists
         if not os.path.exists(destination_path1):
             os.mkdir(destination_path1)

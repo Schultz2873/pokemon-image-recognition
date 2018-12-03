@@ -1,7 +1,7 @@
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
-from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.layers import Dropout, Flatten, Dense
 from keras import backend as kb
 from keras.models import load_model
 from keras.preprocessing import image
@@ -146,13 +146,13 @@ def train(train_directory, validate_directory, img_width, img_height, save: bool
     class_mode = 'categorical'
 
     batch_size = 32
-    epochs = 40
+    epochs = 20
 
     channels = 3
     kernel_size = (3, 3)
     pool_size = (2, 2)
 
-    dropout = .5
+    dropout = .4
 
     conv_2d_layers = 3
     conv_2d_filters = 32
@@ -161,7 +161,7 @@ def train(train_directory, validate_directory, img_width, img_height, save: bool
     # conv_2d_filters = filters_dropout_compensation(conv_2d_filters, dropout)
     print('conv_2d_filters:', conv_2d_filters)
 
-    dense_filters = 64
+    dense_filters = 128
 
     # ensure minimum number of active filters (adjust filters for dropout)
     # dense_filters = filters_dropout_compensation(dense_filters, dropout)
@@ -183,6 +183,7 @@ def train(train_directory, validate_directory, img_width, img_height, save: bool
     for i in range(conv_2d_layers):
         model.add(Conv2D(conv_2d_filters, kernel_size, activation='relu'))
         model.add(MaxPooling2D(pool_size=pool_size))
+        # conv_2d_filters *= 2
 
     # add flatten and dense layers
     model.add(Flatten())

@@ -141,7 +141,12 @@ def show_plot(history, file_name: str = None):
     plt.show()
 
 
-def train(train_directory, validate_directory, img_width, img_height, save: bool = True, show: bool = True):
+def train(train_directory: str, validate_directory: str, img_width: int, img_height: int, save: bool = True,
+          show: bool = True, preprocessing_directory: str = None):
+    # check preprocessing save directory is to be used
+    if preprocessing_directory is not None:
+        file_util.empty_directory(preprocessing_directory)
+
     num_classes = file_util.count_subdirectories(train_directory)
     class_mode = 'categorical'
 
@@ -154,14 +159,14 @@ def train(train_directory, validate_directory, img_width, img_height, save: bool
 
     dropout = .4
 
-    conv_2d_layers = 3
+    conv_2d_layers = 4
     conv_2d_filters = 32
 
     # ensure minimum number of active filters (adjust filters for dropout)
     # conv_2d_filters = filters_dropout_compensation(conv_2d_filters, dropout)
     print('conv_2d_filters:', conv_2d_filters)
 
-    dense_filters = 128
+    dense_filters = 512
 
     # ensure minimum number of active filters (adjust filters for dropout)
     # dense_filters = filters_dropout_compensation(dense_filters, dropout)
@@ -198,13 +203,13 @@ def train(train_directory, validate_directory, img_width, img_height, save: bool
     # this is the augmentation configuration we will use for training
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
-        rotation_range=30,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True,
-        fill_mode='nearest'
+        # rotation_range=30,
+        # width_shift_range=0.2,
+        # height_shift_range=0.2,
+        # shear_range=0.2,
+        # zoom_range=0.2,
+        # horizontal_flip=True,
+        # fill_mode='nearest',
     )
 
     validate_datagen = ImageDataGenerator(rescale=1. / 255)
@@ -213,7 +218,8 @@ def train(train_directory, validate_directory, img_width, img_height, save: bool
         train_directory,
         target_size=(img_width, img_height),
         batch_size=batch_size,
-        class_mode=class_mode)
+        class_mode=class_mode,
+        save_to_dir=preprocessing_directory)
 
     validation_generator = validate_datagen.flow_from_directory(
         validate_directory,
@@ -254,16 +260,18 @@ def train(train_directory, validate_directory, img_width, img_height, save: bool
 def run():
     train_directory = 'datasets/pokemon/train'
     validate_directory = 'datasets/pokemon/validate'
+    preprocessing_directory = 'img_preprocessing'
 
     img_width = 100
     img_height = img_width
 
-    model = train(train_directory, validate_directory, img_width, img_height)
+    model = train(train_directory, validate_directory, img_width, img_height,
+                  preprocessing_directory=None)
     show_predictions(model, 'examples', img_width, img_height)
     model_metrics(model, validate_directory, img_width, img_height)
 
 
 run()
-# show_predictions('C:/Users\Colom\PycharmProjects\pokemon-repo\keras_model/2018-12-01 15-40-33.655437_100x100_20'
-#                  + '-epochs_3-inner_layers_32-filters_0.25-dropout.h5', 'datasets/pokemon/validate/squirtle',
+# show_predictions('C:/Users\colom\PycharmProjects\pokemon-repo\keras_model/2018-12-04 08-20-28.372753_'
+#                  + '100x100_20-epochs_4-inner_layers_32-filters_0.4-dropout.h5', 'examples',
 #                  100, 100)

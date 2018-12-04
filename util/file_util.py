@@ -9,6 +9,11 @@ import random
 import datetime
 
 
+def empty_directory(directory):
+    for file in os.listdir(directory):
+        os.remove(os.path.join(directory, file))
+
+
 def get_files(directory_path):
     return [f for f in os.listdir(directory_path) if isfile(join(directory_path, f))]
 
@@ -150,7 +155,7 @@ def directory_change_image_type(directory: str, extension: str, overwrite: bool 
     for directory_name, subdirectory_list, file_list in os.walk(directory):
         for file_name in file_list:
             change_image_type(directory_name + '/' + file_name, extension, overwrite)
-    print('image types changed')
+    print('\nimage types changed')
 
 
 def build_dataset(core_dataset_directory: str, base_directory: str, dataset_name: str, split_percentage: float,
@@ -181,6 +186,7 @@ def build_dataset(core_dataset_directory: str, base_directory: str, dataset_name
             # iterate over class directories in core dataset
             for class_name in classes:
 
+                # if classlist exists and match found use class or use directory contents only
                 if (class_list is not None and class_name in class_list) or class_list is None:
                     dataset_class_name_directory = os.path.join(core_dataset_directory, class_name)
                     class_train_directory = os.path.join(train_directory, class_name)
@@ -198,7 +204,7 @@ def create_train_validate():
     core_dataset_directory = 'C:/Users/colom/PycharmProjects/pokemon-repo/poke_dataset'
     base_directory = 'C:/Users/colom/PycharmProjects/pokemon-repo/datasets'
     dataset_name = 'pokemon'
-    split_percentage = .75
+    split_percentage = .8
     image_extension = 'jpg'
     class_list = ['bulbasaur', 'charmander', 'pikachu', 'squirtle']
     # class_list = None

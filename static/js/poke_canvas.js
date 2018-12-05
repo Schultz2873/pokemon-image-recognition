@@ -149,6 +149,5 @@ function run() {
     animate();
 }
 
-window.onload = function () {
-    run();
-};
+window.addEventListener('load', run);
+window.addEventListener('resize', run);

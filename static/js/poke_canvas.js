@@ -59,8 +59,9 @@ function run() {
     let minRadius = Math.floor(Math.min(canvas.width, canvas.height) * .06);
     let maxRadius = Math.floor(Math.min(canvas.width, canvas.height) * .2);
     let directionOffset = toRadians(15);
-    let minSpeed = Math.max(canvas.width, canvas.height) * .0001;
-    let maxSpeed = Math.max(canvas.width, canvas.height) * .0005;
+    // let minSpeed = Math.max(canvas.width, canvas.height) * .0001;
+    // let maxSpeed = Math.max(canvas.width, canvas.height) * .0005;
+    let speedModifier = .0055;
     let rotationModifier = .005;
 
 
@@ -94,7 +95,9 @@ function run() {
             }
 
             let direction = randomFloatInRange(-directionOffset, directionOffset);
-            let speed = randomFloatInRange(minSpeed, maxSpeed);
+            // let speed = randomFloatInRange(minSpeed, maxSpeed);
+            // speed proportional to radius size
+            let speed = radius * speedModifier;
 
             let angle = randomFloatInRange(0, TWO_PI);
 

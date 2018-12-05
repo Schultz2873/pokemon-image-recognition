@@ -130,10 +130,22 @@ class CanvasObject {
     }
 
     /**
+     * Updates the current angle based on current rotation value or passed in value.
+     * @param angle A new angle value.
+     */
+    updateAngle(angle = null) {
+        if (angle || angle === 0) {
+            this.angle = angle;
+        } else {
+            this.angle += this.rotation;
+        }
+    }
+
+    /**
      * Moves and draws the object.
      */
     update() {
-        this.angle += this.rotation;
+        this.updateAngle();
         this.move();
         this.draw();
     }

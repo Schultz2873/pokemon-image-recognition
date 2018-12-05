@@ -1,15 +1,15 @@
 class PokeBall extends Circle {
     constructor(context, x, y, radius, direction, shadow) {
         let speedModifier = .0055;
-        let rotationModifier = .005;
-
         let speed = radius * speedModifier;
-        let rotation = speed * rotationModifier * randomSign();
         let angle = randomFloatInRange(0, TWO_PI);
 
-        super(context, x, y, radius, direction, speed, angle, rotation, 'rgba(255, 0, 65, 1)', shadow);
+        super(context, x, y, radius, direction, speed, angle, 0, 'rgba(255, 0, 65, 1)', shadow);
         this.color2 = 'white';
         this.outline = 'black';
+        this.rotationModifier = .005 * randomSign();
+
+        this.updateRotation();
     }
 
     draw() {
@@ -51,6 +51,21 @@ class PokeBall extends Circle {
 
         this.context.lineWidth = null;
     }
+
+    updateRotation(rotation) {
+        if (rotation || rotation === 0) {
+            this.rotation = rotation;
+        } else {
+            this.rotation = this.speed * this.rotationModifier;
+        }
+    }
+
+    update() {
+        this.updateRotation();
+        this.updateAngle();
+        this.move();
+        this.draw();
+    }
 }
 
 PokeBall.addToArray = function (array, pokeBall) {
@@ -82,8 +97,6 @@ function run() {
     let minRadius = Math.floor(Math.min(canvas.width, canvas.height) * .06);
     let maxRadius = Math.floor(Math.min(canvas.width, canvas.height) * .2);
     let directionOffset = toRadians(15);
-    // let minSpeed = Math.max(canvas.width, canvas.height) * .0001;
-    // let maxSpeed = Math.max(canvas.width, canvas.height) * .0005;
 
 
     function animate() {
@@ -116,10 +129,6 @@ function run() {
             }
 
             let direction = randomFloatInRange(-directionOffset, directionOffset);
-
-
-            // rotation proportional to speed
-            // let rotation = randomFloatInRange(-speed * rotationModifier, speed * rotationModifier);
 
             // add a new poke ball
             // pokeBalls.push(new PokeBall(context, x, y, radius, direction, speed, angle, rotation));

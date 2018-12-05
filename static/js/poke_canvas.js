@@ -60,7 +60,9 @@ function run() {
     let maxRadius = Math.floor(Math.min(canvas.width, canvas.height) * .2);
     let directionOffset = toRadians(15);
     let minSpeed = Math.max(canvas.width, canvas.height) * .0001;
-    let maxSpeed = Math.max(canvas.width, canvas.height) * .0003;
+    let maxSpeed = Math.max(canvas.width, canvas.height) * .0005;
+    let rotationModifier = .005;
+
 
     function animate() {
         requestAnimationFrame(animate);
@@ -80,7 +82,6 @@ function run() {
             let radius = randomIntInRange(minRadius, maxRadius);
             let x = -radius + 1;
             let y = randomIntInRange(radius, canvas.height - radius);
-            let rotationModifier = .01;
 
             // place on screen if initial spawn, else place on side
             if (isInitialSpawn) {

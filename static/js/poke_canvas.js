@@ -93,7 +93,7 @@ function run() {
     let isInitialSpawn = true;
 
     let pokeBalls = [];
-    let maxPokeBalls = 8;
+    let maxPokeBalls = 12;
     let minRadius = Math.floor(Math.min(canvas.width, canvas.height) * .06);
     let maxRadius = Math.floor(Math.min(canvas.width, canvas.height) * .2);
     let directionOffset = toRadians(15);

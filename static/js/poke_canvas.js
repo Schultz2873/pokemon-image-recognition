@@ -1,5 +1,12 @@
 class PokeBall extends Circle {
-    constructor(context, x, y, radius, direction, speed, angle, rotation, shadow) {
+    constructor(context, x, y, radius, direction, shadow) {
+        let speedModifier = .0055;
+        let rotationModifier = .005;
+
+        let speed = radius * speedModifier;
+        let rotation = speed * rotationModifier * randomSign();
+        let angle = randomFloatInRange(0, TWO_PI);
+
         super(context, x, y, radius, direction, speed, angle, rotation, 'rgba(255, 0, 65, 1)', shadow);
         this.color2 = 'white';
         this.outline = 'black';
@@ -46,6 +53,22 @@ class PokeBall extends Circle {
     }
 }
 
+PokeBall.addToArray = function (array, pokeBall) {
+    let i = 0;
+    while (i < array.length && array[i].radius < pokeBall.radius) {
+        i++;
+    }
+
+    array.splice(i, 0, pokeBall);
+};
+
+// PokeBall.mouseModifier = function (canvas) {
+//     let minModifier = 0.2;
+//     let mouse = mousePositionCanvas(canvas, 'mousemove');
+//
+//
+// };
+
 function run() {
     const canvas = document.querySelector('canvas');
     const context = canvas.getContext('2d');
@@ -61,8 +84,6 @@ function run() {
     let directionOffset = toRadians(15);
     // let minSpeed = Math.max(canvas.width, canvas.height) * .0001;
     // let maxSpeed = Math.max(canvas.width, canvas.height) * .0005;
-    let speedModifier = .0055;
-    let rotationModifier = .005;
 
 
     function animate() {
@@ -95,19 +116,14 @@ function run() {
             }
 
             let direction = randomFloatInRange(-directionOffset, directionOffset);
-            // let speed = randomFloatInRange(minSpeed, maxSpeed);
-            // speed proportional to radius size
-            let speed = radius * speedModifier;
-
-            let angle = randomFloatInRange(0, TWO_PI);
 
 
             // rotation proportional to speed
             // let rotation = randomFloatInRange(-speed * rotationModifier, speed * rotationModifier);
-            let rotation = speed * rotationModifier * randomSign();
 
             // add a new poke ball
-            pokeBalls.push(new PokeBall(context, x, y, radius, direction, speed, angle, rotation));
+            // pokeBalls.push(new PokeBall(context, x, y, radius, direction, speed, angle, rotation));
+            PokeBall.addToArray(pokeBalls, new PokeBall(context, x, y, radius, direction));
         }
 
         // initial spawn set to false after initial poke ball placement

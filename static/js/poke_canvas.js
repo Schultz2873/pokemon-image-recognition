@@ -77,26 +77,23 @@ PokeBall.addToArray = function (array, pokeBall) {
     array.splice(i, 0, pokeBall);
 };
 
-// PokeBall.mouseModifier = function (canvas) {
-//     let minModifier = 0.2;
-//     let mouse = mousePositionCanvas(canvas, 'mousemove');
-//
-//
-// };
-
-const pokeCanvas = function () {
-    let canvas = document.querySelector('#poke-canvas');
+const pokeBallCanvas = function () {
+    let canvas = document.querySelector('#poke-ball-canvas');
     let context = canvas.getContext('2d');
 
     setCanvasSize(canvas, innerWidth, innerHeight);
 
+    let mouse = null;
     let isInitialSpawn = true;
-
     let pokeBalls = [];
     let maxPokeBalls = 12;
     let minRadius = 0;
     let maxRadius = 0;
     let directionOffset = toRadians(15);
+
+    window.addEventListener('mousemove', function (event) {
+        mouse = mousePositionCanvas(canvas, event);
+    });
 
     function init() {
         setCanvasSize(canvas, innerWidth, innerHeight);
@@ -120,7 +117,6 @@ const pokeCanvas = function () {
 
         // add new poke balls if limit is not reached
         while (pokeBalls.length < maxPokeBalls) {
-
             let radius = randomIntInRange(minRadius, maxRadius);
             let x = -radius + 1;
             let y = randomIntInRange(radius, canvas.height - radius);
@@ -160,5 +156,5 @@ const pokeCanvas = function () {
     };
 }();
 
-window.addEventListener('load', pokeCanvas.animate);
-window.addEventListener('resize', pokeCanvas.init);
+window.addEventListener('load', pokeBallCanvas.animate);
+window.addEventListener('resize', pokeBallCanvas.init);

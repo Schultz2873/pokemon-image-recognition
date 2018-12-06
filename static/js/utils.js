@@ -441,3 +441,10 @@ function mousePositionCanvas(canvas, event) {
         y: event.clientY - rect.top
     };
 }
+
+function mousePercentage(x, y, canvas) {
+    return {
+        xPercentage: x / canvas.width,
+        yPercentage: y / canvas.height
+    }
+}

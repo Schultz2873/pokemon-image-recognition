@@ -38,7 +38,7 @@ def _calc_steps_per_epoch(samples: int, batch_size: int):
     return math.ceil(samples / batch_size)
 
 
-def filters_dropout_compensation(min_active_filters, dropout):
+def filters_dropout_compensation(min_active_filters: int, dropout: float):
     """
     Calculates the minimum number of active filters, adjusted for dropout. For example, if 50 active filters are
     required and a dropout value of .2 is used, the value 63 will be returned. (When the 63 filters are set, 20% will
@@ -53,10 +53,15 @@ def filters_dropout_compensation(min_active_filters, dropout):
         return 0
 
 
-def show_predictions(model, img_directory: str, width, height):
+def class_label(labels_directory: str, class_index: int):
+    return os.listdir(labels_directory)[class_index]
+
+
+def get_predictions(model, img_directory: str, train_directory: str, width: int, height: int):
     # if model is file path string, load keras model from file path
     print('directory:', img_directory)
     model = _get_model(model)
+    predictions = []
 
     # run predictions on model
     images = []
@@ -70,11 +75,15 @@ def show_predictions(model, img_directory: str, width, height):
 
     images = np.vstack(images)
     # predictions = model.predict(images)
-    classes = model.predict_classes(images)
+    class_indices = model.predict_classes(images)
     i = 0
-    for class_value in classes:
-        print(files[i] + ': predicted ' + str(class_value))
+    for class_index in class_indices:
+        result = class_label(train_directory, class_index)
+        predictions.append(result)
+        print(files[i] + ': predicted ' + result.upper() + ' (' + str(class_index) + ')')
         i += 1
+
+    return predictions
 
 
 def model_metrics(model, test_directory: str, img_width: int, img_height: int):
@@ -142,10 +151,22 @@ def show_plot(history, file_name: str = None):
 
 
 def train(train_directory: str, validate_directory: str, img_width: int, img_height: int, save: bool = True,
-          show: bool = True, preprocessing_directory: str = None):
+          show: bool = True, use_pre_processing: bool = False, pre_processing_directory: str = None):
     # check preprocessing save directory is to be used
-    if preprocessing_directory is not None:
-        file_util.empty_directory(preprocessing_directory)
+    if pre_processing_directory is not None:
+        file_util.empty_directory(pre_processing_directory)
+
+    rescale = 1. / 255
+    shear_range = None
+    zoom_range = None
+    horizontal_flip = False
+    fill_mode = None
+
+    if use_pre_processing:
+        shear_range = 0.2,
+        zoom_range = 0.2,
+        horizontal_flip = True,
+        fill_mode = 'nearest',
 
     num_classes = file_util.count_subdirectories(train_directory)
     class_mode = 'categorical'
@@ -202,24 +223,21 @@ def train(train_directory: str, validate_directory: str, img_width: int, img_hei
 
     # this is the augmentation configuration we will use for training
     train_datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        # rotation_range=30,
-        # width_shift_range=0.2,
-        # height_shift_range=0.2,
-        # shear_range=0.2,
-        # zoom_range=0.2,
-        # horizontal_flip=True,
-        # fill_mode='nearest',
+        rescale=rescale,
+        shear_range=shear_range,
+        zoom_range=zoom_range,
+        horizontal_flip=horizontal_flip,
+        fill_mode=fill_mode,
     )
 
-    validate_datagen = ImageDataGenerator(rescale=1. / 255)
+    validate_datagen = ImageDataGenerator(rescale=rescale)
 
     train_generator = train_datagen.flow_from_directory(
         train_directory,
         target_size=(img_width, img_height),
         batch_size=batch_size,
         class_mode=class_mode,
-        save_to_dir=preprocessing_directory)
+        save_to_dir=pre_processing_directory)
 
     validation_generator = validate_datagen.flow_from_directory(
         validate_directory,
@@ -241,8 +259,8 @@ def train(train_directory: str, validate_directory: str, img_width: int, img_hei
     # file naming strings
     now_string = file_util.date_string_now()
 
-    info_string = str(img_width) + 'x' + str(img_height) + '_' + str(epochs) + '-epochs_' + str(
-        conv_2d_layers) + '-inner_layers_' + str(conv_2d_filters) + '-filters_' + str(dropout) + '-dropout'
+    info_string = str(img_width) + 'x' + str(img_height) + '_' + str(epochs) + '-e_' + str(
+        conv_2d_layers) + '-c2dl_' + str(conv_2d_filters) + '-f_' + str(dropout) + '-d'
 
     file_string = now_string + '_' + info_string
 
@@ -260,18 +278,20 @@ def train(train_directory: str, validate_directory: str, img_width: int, img_hei
 def run():
     train_directory = 'datasets/pokemon/train'
     validate_directory = 'datasets/pokemon/validate'
-    preprocessing_directory = 'img_preprocessing'
+    use_pre_processing = True
+    pre_processing_directory = 'img_preprocessing'
+    # pre_processing_directory = None
 
     img_width = 100
     img_height = img_width
 
     model = train(train_directory, validate_directory, img_width, img_height,
-                  preprocessing_directory=None)
-    show_predictions(model, 'examples', img_width, img_height)
+                  use_pre_processing=use_pre_processing, pre_processing_directory=pre_processing_directory)
+    get_predictions(model, 'examples', train_directory, img_width, img_height)
     model_metrics(model, validate_directory, img_width, img_height)
 
 
 run()
-# show_predictions('C:/Users\colom\PycharmProjects\pokemon-repo\keras_model/2018-12-04 08-20-28.372753_'
-#                  + '100x100_20-epochs_4-inner_layers_32-filters_0.4-dropout.h5', 'examples',
-#                  100, 100)
+# print(get_predictions('C:/Users\colom\PycharmProjects\pokemon-repo\keras_model/2018-12-04 08-20-28.372753_100x100_'
+#                       + '20-epochs_4-inner_layers_32-filters_0.4-dropout.h5', 'examples', 'datasets/pokemon/train',
+#                       100, 100))

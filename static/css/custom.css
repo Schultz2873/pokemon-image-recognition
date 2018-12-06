@@ -1,9 +1,15 @@
 body {
-    background-color: ghostwhite;
+    /*background-color: ghostwhite;*/
 }
 
 .navbar {
     background-color: red;
+}
+
+.background-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
 }
 
 strong {

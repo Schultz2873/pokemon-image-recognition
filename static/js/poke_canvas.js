@@ -1,6 +1,6 @@
 class PokeBall extends Circle {
     constructor(context, x, y, radius, direction, shadow) {
-        let speedModifier = .0055;
+        let speedModifier = .025;
         let speed = radius * speedModifier;
         let angle = randomFloatInRange(0, TWO_PI);
 
@@ -84,9 +84,9 @@ PokeBall.addToArray = function (array, pokeBall) {
 //
 // };
 
-function run() {
-    const canvas = document.querySelector('canvas');
-    const context = canvas.getContext('2d');
+const pokeCanvas = function () {
+    let canvas = document.querySelector('#poke-canvas');
+    let context = canvas.getContext('2d');
 
     setCanvasSize(canvas, innerWidth, innerHeight);
 
@@ -94,10 +94,17 @@ function run() {
 
     let pokeBalls = [];
     let maxPokeBalls = 12;
-    let minRadius = Math.floor(Math.min(canvas.width, canvas.height) * .06);
-    let maxRadius = Math.floor(Math.min(canvas.width, canvas.height) * .2);
+    let minRadius = 0;
+    let maxRadius = 0;
     let directionOffset = toRadians(15);
 
+    function init() {
+        setCanvasSize(canvas, innerWidth, innerHeight);
+        isInitialSpawn = true;
+        pokeBalls = [];
+        minRadius = Math.floor(Math.min(canvas.width, canvas.height) * .06);
+        maxRadius = Math.floor(Math.min(canvas.width, canvas.height) * .2);
+    }
 
     function animate() {
         requestAnimationFrame(animate);
@@ -131,7 +138,6 @@ function run() {
             let direction = randomFloatInRange(-directionOffset, directionOffset);
 
             // add a new poke ball
-            // pokeBalls.push(new PokeBall(context, x, y, radius, direction, speed, angle, rotation));
             PokeBall.addToArray(pokeBalls, new PokeBall(context, x, y, radius, direction));
         }
 
@@ -146,8 +152,13 @@ function run() {
         }
     }
 
-    animate();
-}
+    init();
 
-window.addEventListener('load', run);
-window.addEventListener('resize', run);
+    return {
+        init: init,
+        animate: animate
+    };
+}();
+
+window.addEventListener('load', pokeCanvas.animate);
+window.addEventListener('resize', pokeCanvas.init);

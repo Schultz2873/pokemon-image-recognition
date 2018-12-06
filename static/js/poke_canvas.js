@@ -99,7 +99,7 @@ const pokeBallCanvas = function () {
         setCanvasSize(canvas, innerWidth, innerHeight);
         isInitialSpawn = true;
         pokeBalls = [];
-        minRadius = Math.floor(Math.min(canvas.width, canvas.height) * .06);
+        minRadius = Math.floor(Math.min(canvas.width, canvas.height) * .03);
         maxRadius = Math.floor(Math.min(canvas.width, canvas.height) * .2);
     }
 

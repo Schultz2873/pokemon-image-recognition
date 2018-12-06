@@ -157,16 +157,19 @@ def train(train_directory: str, validate_directory: str, img_width: int, img_hei
         file_util.empty_directory(pre_processing_directory)
 
     rescale = 1. / 255
-    shear_range = None
-    zoom_range = None
+    width_shift_range = 0
+    height_shift_range = 0
+    shear_range = 0
+    zoom_range = 0
     horizontal_flip = False
-    fill_mode = None
+    fill_mode = 'nearest'
 
     if use_pre_processing:
-        shear_range = 0.2,
-        zoom_range = 0.2,
-        horizontal_flip = True,
-        fill_mode = 'nearest',
+        width_shift_range = .05
+        height_shift_range = .05
+        shear_range = .2
+        zoom_range = .05
+        horizontal_flip = True
 
     num_classes = file_util.count_subdirectories(train_directory)
     class_mode = 'categorical'
@@ -224,6 +227,8 @@ def train(train_directory: str, validate_directory: str, img_width: int, img_hei
     # this is the augmentation configuration we will use for training
     train_datagen = ImageDataGenerator(
         rescale=rescale,
+        width_shift_range=width_shift_range,
+        height_shift_range=height_shift_range,
         shear_range=shear_range,
         zoom_range=zoom_range,
         horizontal_flip=horizontal_flip,
@@ -291,7 +296,7 @@ def run():
     model_metrics(model, validate_directory, img_width, img_height)
 
 
-run()
-# print(get_predictions('C:/Users\colom\PycharmProjects\pokemon-repo\keras_model/2018-12-04 08-20-28.372753_100x100_'
-#                       + '20-epochs_4-inner_layers_32-filters_0.4-dropout.h5', 'examples', 'datasets/pokemon/train',
-#                       100, 100))
+# run()
+print(get_predictions('C:/Users\colom\PycharmProjects\pokemon-repo\keras_model/2018-12-06 12-55-48.493597_100x100'
+                      '_20-e_4-c2dl_32-f_0.4-d.h5', 'datasets/pokemon/validate/charmander',
+                      'datasets/pokemon/train', 100, 100))

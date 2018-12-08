@@ -44,7 +44,7 @@ def upload():
             print('prediction_data:', prediction_data.__str__())
             # return prediction_data.class_name.capitalize() + ': ' + prediction_data.formatted_probability(2)
             return json.dumps({'status': 'OK', 'class_name': prediction_data.class_name.capitalize(),
-                               'probability': prediction_data.formatted_probability(2)})
+                               'probability': str(prediction_data.probability)})
 
     # return redirect('/')
 

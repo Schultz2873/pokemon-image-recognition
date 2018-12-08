@@ -1,20 +1,7 @@
-// $(function () {
-//     $('#upload-form').submit(function (event) {
-//         event.preventDefault();
-//         let formData = new FormData(this);
-//         $.ajax({
-//             url: '/upload',
-//             type: 'POST',
-//             data: $(this).serialize(),
-//             success: function (response) {
-//                 console.log(response);
-//             },
-//             error: function (error) {
-//                 console.log(error);
-//             }
-//         });
-//     });
-// });
+function formatProbability(probability, decimalPlaces) {
+    probability *= 100;
+    return probability.toFixed(decimalPlaces) + '%';
+}
 
 $("#upload-form").submit(function (event) {
     event.preventDefault(); //prevent default action
@@ -31,6 +18,12 @@ $("#upload-form").submit(function (event) {
         processData: false
     }).done(function (response) {
         // $("#server-results").html(response);
-        console.log(response)
+        let responseData = {
+            status: response.status,
+            class_name: response.class_name,
+            probability: parseFloat(response.probability)
+        };
+        console.log(responseData);
+        console.log(formatProbability(responseData.probability, 2));
     });
 });

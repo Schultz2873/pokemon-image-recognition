@@ -1,5 +1,5 @@
 class PokeBall extends Circle {
-    constructor(context, x, y, radius, direction, shadow = null) {
+    constructor(context, x, y, radius, direction = 0, shadow = null) {
         let speedModifier = .02;
         let speed = radius * speedModifier;
         let angle = randomFloatInRange(0, TWO_PI);
@@ -8,7 +8,6 @@ class PokeBall extends Circle {
         this.color2 = 'white';
         this.outline = 'black';
         this.rotationModifier = .005 * randomSign();
-        this.speedModifier = speedModifier;
 
         this.updateRotation();
     }

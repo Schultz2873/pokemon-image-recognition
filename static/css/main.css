@@ -10,7 +10,12 @@ body {
     /*background-color: red;*/
     /*background-color: #383961;*/
     background-color: rgba(235, 0, 45, 1);
-    border-bottom: 2px solid black;
+    /*border-bottom: 2px solid black;*/
+    box-shadow: 0 0 4px black;
+}
+
+.nav-img {
+    width: 30px;
 }
 
 .background-canvas {
@@ -20,6 +25,12 @@ body {
     z-index: -10;
 }
 
-strong {
+.info-panel {
+    background-color: rgba(0, 0, 0, .8);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.txt-white {
     color: white;
 }

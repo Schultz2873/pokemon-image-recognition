@@ -15,6 +15,42 @@ import math
 import os
 
 
+class PredictionData:
+    def __init__(self, model, image_path: str, labels_directory: str, width: int, height: int):
+        model = get_model(model)
+
+        img = image.load_img(image_path, target_size=(width, height))
+        img_tensor = image.img_to_array(img)
+        img_tensor = np.expand_dims(img_tensor, axis=0)
+
+        class_indices = model.predict_classes(np.vstack([img_tensor]))
+
+        img_tensor /= 255.
+
+        class_predictions = model.predict(img_tensor)[0]
+
+        self.image_path = image_path
+        self.class_index = class_indices[0]
+        self.class_name = class_label(labels_directory, self.class_index)
+        self.probability = max(class_predictions)
+        self.predictions = class_predictions
+        self.labels = os.listdir(labels_directory)
+
+        kb.clear_session()
+
+    def formatted_probability(self, ndigits=0):
+        probability = round(self.probability * 100, ndigits)
+
+        if ndigits == 0:
+            probability = int(probability)
+        return str(probability) + '%'
+
+    def __str__(self):
+        return 'image_path: ' + self.image_path + ', class_name: ' + self.class_name + ', class_index: ' + str(
+            self.class_index) + ', probability: ' + str(
+            self.probability) + ', predictions: ' + self.predictions.__str__() + ', labels: ' + self.labels.__str__()
+
+
 def save_model(model, file_name: str = None):
     model_directory = 'keras_model/'
     weights_directory = 'keras_weights/'
@@ -53,13 +89,15 @@ def filters_dropout_compensation(min_active_filters: int, dropout: float):
         return 0
 
 
-def predictions_prepare_images(img_directory, width, height):
+def predictions_prepare_images(img_directory: str, width: int, height: int):
     filenames = file_util.get_files_walk(img_directory)
     images = []
+
     for filename in filenames:
         img = image.load_img(filename, target_size=(width, height))
         img = image.img_to_array(img)
         img = np.expand_dims(img, axis=0)
+
         images.append(img)
 
     return np.vstack(images), filenames
@@ -69,7 +107,29 @@ def class_label(labels_directory: str, class_index: int):
     return os.listdir(labels_directory)[class_index]
 
 
-def get_predictions(model, img_directory: str, train_directory: str, width: int, height: int):
+# def prediction_data(model, image_path: str, validate_directory: str, width: int, height: int):
+#     model = get_model(model)
+#
+#     img = image.load_img(image_path, target_size=(width, height))
+#     img_tensor = image.img_to_array(img)
+#     img_tensor = np.expand_dims(img_tensor, axis=0)
+#
+#     class_indices = model.predict_classes(np.vstack([img_tensor]))
+#     print('class indices:', class_indices)
+#     print('class:', class_label(validate_directory, class_indices[0]))
+#
+#     img_tensor /= 255.
+#
+#     plt.imshow(img_tensor[0])
+#     # plt.axis('off')
+#     plt.show()
+#
+#     class_predictions = model.predict(img_tensor)
+#
+#     print('class predictions:', class_predictions)
+
+
+def get_predictions(model, img_directory: str, labels_directory: str, width: int, height: int):
     print('model:', model)
     print('image directory:', img_directory)
 
@@ -77,29 +137,25 @@ def get_predictions(model, img_directory: str, train_directory: str, width: int,
     model = get_model(model)
     predictions = []
 
-    # run predictions on model
-    # images = []
-    # files = file_util.get_files_directory(img_directory)
-    #
-    # for file in files:
-    #     img = image.load_img(os.path.join(img_directory, file), target_size=(width, height))
-    #     img = image.img_to_array(img)
-    #     img = np.expand_dims(img, axis=0)
-    #     images.append(img)
-    #
-    # images = np.vstack(images)
+    image_paths = file_util.get_files_walk(img_directory)
+
+    for image_path in image_paths:
+        prediction_data = PredictionData(model, image_path, labels_directory, width, height)
+        predictions.append(prediction_data)
+        print(prediction_data.__str__())
 
     # get images prepared for predictions and get image filenames
-    images, filenames = predictions_prepare_images(img_directory, width, height)
+    # images, filenames = predictions_prepare_images(img_directory, width, height)
+    #
+    # class_indices = model.predict_classes(images)
+    # i = 0
+    # for class_index in class_indices:
+    #     result = class_label(validate_directory, class_index)
+    #     predictions.append(result)
+    #     print(filenames[i] + ': predicted ' + result.upper() + ' (' + str(class_index) + ')')
+    #     i += 1
 
-    class_indices = model.predict_classes(images)
-    i = 0
-    for class_index in class_indices:
-        result = class_label(train_directory, class_index)
-        predictions.append(result)
-        print(filenames[i] + ': predicted ' + result.upper() + ' (' + str(class_index) + ')')
-        i += 1
-
+    kb.clear_session()
     return predictions
 
 
@@ -183,6 +239,7 @@ def train(train_directory: str, validate_directory: str, img_width: int, img_hei
     horizontal_flip = False
     fill_mode = 'nearest'
 
+    # if using preprocessing, set values
     if pre_processing_directory is not None:
         width_shift_range = .05
         height_shift_range = .05
@@ -311,12 +368,13 @@ def run():
 
     model = train(train_directory, validate_directory, img_width, img_height,
                   pre_processing_directory=pre_processing_directory)
-    get_predictions(model, 'examples', train_directory, img_width, img_height)
+    get_predictions(model, 'examples', validate_directory, img_width, img_height)
     model_metrics(model, validate_directory, img_width, img_height)
 
+# run()
 
-run()
-# print(get_predictions(
-#     'C:/Users/Colom/PycharmProjects/pokemon-repo/keras_model/2018-12-07 18-32-33.836662_100x100_2-e_4-c2dl_32-f_0.4-d.h5',
-#     'datasets/pokemon/validate/charmander',
-#     'datasets/pokemon/train', 100, 100))
+# get_predictions(
+#     'C:/Users/Colom/PycharmProjects/pokemon-repo/keras_model/2018-12-07 20-18-42.779946_100x100_20-e_4-c2dl_32-f'
+#     + '_0.4-d.h5',
+#     'C:/Users/Colom/PycharmProjects/pokemon-repo/examples',
+#     'C:/Users/Colom/PycharmProjects/pokemon-repo/datasets/pokemon/validate', 100, 100)

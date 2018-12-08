@@ -20,26 +20,43 @@
 {#{% block body %}#}
 {#    {% block navbar %}#}
 <nav class="navbar navbar-expand-lg navbar-light poke-navbar">
-    <a class="navbar-brand" href="#">
-        <img src="/static/images/pokeball.png" width="30" height="30" class="d-inline-block align-top" alt="">
+    <a class="navbar-brand" href="/">
+        <img src="/static/images/pokeball.png" class="d-inline-block align-top nav-img" alt="">
     </a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="#"><strong>Home</strong><span class="sr-only">(current)</span></a>
+                <a class="nav-link" href="#"><strong class="txt-white">Home</strong><span
+                        class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#"><strong>About us</strong></a>
+                <a class="nav-link" href="#"><strong class="txt-white">About us</strong></a>
             </li>
         </ul>
     </div>
 </nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="info-panel txt-white d-inline-block my-2">
+                {#                image upload form#}
+                <form id="upload-form" action="{{ url_for('upload') }}" method="post" enctype=multipart/form-data>
+                    <input type="file" name="file">
+                    <input id="upload-submit" class="btn btn-info" type="submit" value="Analyze">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{#poke ball background canvas#}
 <canvas id="poke-ball-canvas" class="background-canvas"></canvas>
 {#    {% endblock %}#}
 {#{% endblock %}#}
 {##}
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
         integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
@@ -51,5 +68,6 @@
 <script src="{{ url_for('static',filename='js/utils.js') }}"></script>
 <script src="{{ url_for('static',filename='js/canvas.js') }}"></script>
 <script src="{{ url_for('static',filename='js/poke_ball_canvas.js') }}"></script>
+<script src="{{ url_for('static',filename='js/predictions.js') }}"></script>
 </body>
 </html>

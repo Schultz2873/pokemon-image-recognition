@@ -98,14 +98,12 @@ def _copy_or_move(source_path, destination_path, file_names, index, is_copy):
 
 
 def count_subdirectories(directory):
-    # count = 0
-    # directory_list = os.listdir(directory)
-    # for name in directory_list:
-    #     if os.path.isdir(directory + '/' + name):
-    #         count += 1
-    # return count
-
-    return len(os.listdir(directory))
+    count = 0
+    directory_list = os.listdir(directory)
+    for name in directory_list:
+        if os.path.isdir(os.path.join(directory, name)):
+            count += 1
+    return count
 
 
 def date_string_now():
@@ -115,21 +113,29 @@ def date_string_now():
     return now_string
 
 
-def resize_images(directory, width, height):
-    files = os.listdir(directory)
-
-    for i in range(0, len(files)):
-        image_path = directory + '/' + files[i]
+def resize_image(image_path, width, height):
+    if isfile(image_path):
         image = Image.open(image_path)
         new_image = image.resize((width, height))
         new_image.save(image_path)
 
 
-def change_image_type(image_path: str, extension: str, overwrite: bool = True, handle_palette: bool = True):
+def resize_images(directory, width, height):
+    file_paths = os.listdir(directory)
+
+    for file_path in file_paths:
+        resize_image(file_path, width, height)
+
+
+def change_image_type(image_path: str, extension: str = None, overwrite: bool = True, handle_palette: bool = True):
     if os.path.isfile(image_path):
-        extension = '.' + extension
         # get file root and extension
         img_root, img_extension = os.path.splitext(image_path)
+
+        if extension is not None:
+            extension = '.' + extension
+        else:
+            extension = img_extension
 
         # if img_extension != extension:
         print('modifying file:', image_path)

@@ -1,0 +1,25 @@
+body {
+    /*background-color: ghostwhite;*/
+}
+
+/*.navbar {*/
+/*background-color: red;*/
+/*}*/
+
+.poke-navbar {
+    /*background-color: red;*/
+    /*background-color: #383961;*/
+    background-color: rgba(235, 0, 45, 1);
+    border-bottom: 2px solid black;
+}
+
+.background-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -10;
+}
+
+strong {
+    color: white;
+}

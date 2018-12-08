@@ -14,14 +14,22 @@ def empty_directory(directory):
         os.remove(os.path.join(directory, file))
 
 
-def get_files(directory_path):
+def get_files_directory(directory_path):
     return [f for f in os.listdir(directory_path) if isfile(join(directory_path, f))]
+
+
+def get_files_walk(directory):
+    files = []
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for filename in filenames:
+            files.append(os.path.join(dirpath, filename))
+    return files
 
 
 def num_files(directory):
     total = 0
-    for root, dirs, files in os.walk(directory):
-        total += len(files)
+    for dirpath, dirnames, filenames in os.walk(directory):
+        total += len(filenames)
     return total
 
 
@@ -212,6 +220,5 @@ def create_train_validate():
 
     build_dataset(core_dataset_directory, base_directory, dataset_name, split_percentage, image_extension,
                   class_list=class_list, overwrite_existing=overwrite_existing)
-
 
 # create_train_validate()

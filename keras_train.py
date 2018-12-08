@@ -27,7 +27,7 @@ def save_model(model, file_name: str = None):
     model.save(model_directory + file_name + extension)
 
 
-def _get_model(model):
+def get_model(model):
     if type(model) == str:
         return load_model(model)
     elif type(model) == Sequential:
@@ -40,7 +40,7 @@ def _calc_steps_per_epoch(samples: int, batch_size: int):
 
 def filters_dropout_compensation(min_active_filters: int, dropout: float):
     """
-    Calculates the minimum number of active filters, adjusted for dropout. For example, if 50 active filters are
+    Calculate the minimum number of active filters adjusted for dropout. For example, if 50 active filters are
     required and a dropout value of .2 is used, the value 63 will be returned. (When the 63 filters are set, 20% will
     be turned off due to dropout).
     :param min_active_filters: The minimum number of active filters
@@ -53,41 +53,58 @@ def filters_dropout_compensation(min_active_filters: int, dropout: float):
         return 0
 
 
+def predictions_prepare_images(img_directory, width, height):
+    filenames = file_util.get_files_walk(img_directory)
+    images = []
+    for filename in filenames:
+        img = image.load_img(filename, target_size=(width, height))
+        img = image.img_to_array(img)
+        img = np.expand_dims(img, axis=0)
+        images.append(img)
+
+    return np.vstack(images), filenames
+
+
 def class_label(labels_directory: str, class_index: int):
     return os.listdir(labels_directory)[class_index]
 
 
 def get_predictions(model, img_directory: str, train_directory: str, width: int, height: int):
+    print('model:', model)
+    print('image directory:', img_directory)
+
     # if model is file path string, load keras model from file path
-    print('directory:', img_directory)
-    model = _get_model(model)
+    model = get_model(model)
     predictions = []
 
     # run predictions on model
-    images = []
-    files = file_util.get_files(img_directory)
+    # images = []
+    # files = file_util.get_files_directory(img_directory)
+    #
+    # for file in files:
+    #     img = image.load_img(os.path.join(img_directory, file), target_size=(width, height))
+    #     img = image.img_to_array(img)
+    #     img = np.expand_dims(img, axis=0)
+    #     images.append(img)
+    #
+    # images = np.vstack(images)
 
-    for file in files:
-        img = image.load_img(os.path.join(img_directory, file), target_size=(width, height))
-        img = image.img_to_array(img)
-        img = np.expand_dims(img, axis=0)
-        images.append(img)
+    # get images prepared for predictions and get image filenames
+    images, filenames = predictions_prepare_images(img_directory, width, height)
 
-    images = np.vstack(images)
-    # predictions = model.predict(images)
     class_indices = model.predict_classes(images)
     i = 0
     for class_index in class_indices:
         result = class_label(train_directory, class_index)
         predictions.append(result)
-        print(files[i] + ': predicted ' + result.upper() + ' (' + str(class_index) + ')')
+        print(filenames[i] + ': predicted ' + result.upper() + ' (' + str(class_index) + ')')
         i += 1
 
     return predictions
 
 
 def model_metrics(model, test_directory: str, img_width: int, img_height: int):
-    model = _get_model(model)
+    model = get_model(model)
 
     test_generator = ImageDataGenerator()
     test_data_generator = test_generator.flow_from_directory(
@@ -151,23 +168,25 @@ def show_plot(history, file_name: str = None):
 
 
 def train(train_directory: str, validate_directory: str, img_width: int, img_height: int, save: bool = True,
-          show: bool = True, use_pre_processing: bool = False, pre_processing_directory: str = None):
+          show: bool = True, pre_processing_directory: str = None):
+    seed = 10
+
     # check preprocessing save directory is to be used
     if pre_processing_directory is not None:
         file_util.empty_directory(pre_processing_directory)
 
     rescale = 1. / 255
-    width_shift_range = 0
-    height_shift_range = 0
-    shear_range = 0
-    zoom_range = 0
+    width_shift_range = 0.
+    height_shift_range = 0.
+    shear_range = 0.
+    zoom_range = 0.
     horizontal_flip = False
     fill_mode = 'nearest'
 
-    if use_pre_processing:
+    if pre_processing_directory is not None:
         width_shift_range = .05
         height_shift_range = .05
-        shear_range = .2
+        shear_range = 2.
         zoom_range = .05
         horizontal_flip = True
 
@@ -242,7 +261,8 @@ def train(train_directory: str, validate_directory: str, img_width: int, img_hei
         target_size=(img_width, img_height),
         batch_size=batch_size,
         class_mode=class_mode,
-        save_to_dir=pre_processing_directory)
+        save_to_dir=pre_processing_directory,
+        seed=seed)
 
     validation_generator = validate_datagen.flow_from_directory(
         validate_directory,
@@ -283,20 +303,20 @@ def train(train_directory: str, validate_directory: str, img_width: int, img_hei
 def run():
     train_directory = 'datasets/pokemon/train'
     validate_directory = 'datasets/pokemon/validate'
-    use_pre_processing = True
-    pre_processing_directory = 'img_preprocessing'
-    # pre_processing_directory = None
+    # pre_processing_directory = 'img_preprocessing'
+    pre_processing_directory = None
 
     img_width = 100
     img_height = img_width
 
     model = train(train_directory, validate_directory, img_width, img_height,
-                  use_pre_processing=use_pre_processing, pre_processing_directory=pre_processing_directory)
+                  pre_processing_directory=pre_processing_directory)
     get_predictions(model, 'examples', train_directory, img_width, img_height)
     model_metrics(model, validate_directory, img_width, img_height)
 
 
-# run()
-print(get_predictions('C:/Users\colom\PycharmProjects\pokemon-repo\keras_model/2018-12-06 12-55-48.493597_100x100'
-                      '_20-e_4-c2dl_32-f_0.4-d.h5', 'datasets/pokemon/validate/charmander',
-                      'datasets/pokemon/train', 100, 100))
+run()
+# print(get_predictions(
+#     'C:/Users/Colom/PycharmProjects/pokemon-repo/keras_model/2018-12-07 18-32-33.836662_100x100_2-e_4-c2dl_32-f_0.4-d.h5',
+#     'datasets/pokemon/validate/charmander',
+#     'datasets/pokemon/train', 100, 100))

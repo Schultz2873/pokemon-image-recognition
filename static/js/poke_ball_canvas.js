@@ -1,6 +1,6 @@
 class PokeBall extends Circle {
     constructor(context, x, y, radius, direction, shadow) {
-        let speedModifier = .025;
+        let speedModifier = .02;
         let speed = radius * speedModifier;
         let angle = randomFloatInRange(0, TWO_PI);
 

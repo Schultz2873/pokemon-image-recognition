@@ -26,15 +26,19 @@ def upload():
     key = 'file'
 
     if key in request.files:
-        file = request.files[key]
+        file = request.files.get(key)
         filename = file.filename
+
+        # if valid file
         if filename != '' and is_allowed_file(filename, app.config['ALLOWED_EXTENSIONS']):
             filename = secure_filename(file.filename)
+
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(image_path)
 
             model_path = '../pokemon-repo/keras_model/2018-12-07 20-18-42.779946_100x100' \
                          + '_20-e_4-c2dl_32-f_0.4-d.h5'
+
             labels_directory = '../pokemon-repo/datasets/pokemon/validate'
             img_size = app.config['IMAGE_CONVERSION_SIZE']
             prediction_data = PredictionData(model_path, image_path, labels_directory, img_size[0], img_size[1])

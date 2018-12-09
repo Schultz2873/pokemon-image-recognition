@@ -7,7 +7,7 @@ class PokeBall extends Circle {
         this.speedModifier = this.baseSpeedModifier;
         this.baseSpeed = speed;
         this.prevSpeed = this.speed;
-        this.baseRotationModifier = .005 * randomSign();
+        this.baseRotationModifier = .003 * randomSign();
         this.rotationModifier = this.baseRotationModifier;
         this.baseRotation = rotation;
         this.color2 = color2;

@@ -227,4 +227,5 @@ def create_train_validate():
     build_dataset(core_dataset_directory, base_directory, dataset_name, split_percentage, image_extension,
                   class_list=class_list, overwrite_existing=overwrite_existing)
 
+
 # create_train_validate()

@@ -3,6 +3,16 @@ function formatProbability(probability, decimalPlaces) {
     return probability.toFixed(decimalPlaces) + '%';
 }
 
+document.querySelector('#img-input').addEventListener('change', function () {
+    let reader = new FileReader();
+
+    reader.addEventListener('load', function (event) {
+        document.querySelector('#img-preview').src = event.target.result;
+    });
+
+    reader.readAsDataURL(this.files[0]);
+});
+
 $("#upload-form").submit(function (event) {
     event.preventDefault(); //prevent default action
     let post_url = $(this).attr("action"); //get form action url

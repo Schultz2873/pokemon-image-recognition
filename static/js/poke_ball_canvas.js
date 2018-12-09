@@ -1,15 +1,19 @@
 class PokeBall extends Circle {
-    constructor(context, x, y, radius, direction = 0, shadow = null) {
-        let speedModifier = .02;
-        let speed = radius * speedModifier;
-        let angle = randomFloatInRange(0, TWO_PI);
-
-        super(context, x, y, radius, direction, speed, angle, 0, 'rgba(255, 0, 65, 1)', shadow);
-        this.color2 = 'white';
-        this.outline = 'black';
-        this.rotationModifier = .005 * randomSign();
-
-        this.updateRotation();
+    constructor(context, x, y, radius, direction = 0, angle = 0, speed = 0, rotation = 0, color = 'rgba(255, 0, 65, 1)',
+                color2 = 'white', outline = 'black', shadow = null, isProportionalSpeed = true,
+                isProportionalRotation = true) {
+        super(context, x, y, radius, direction, speed, angle, rotation, color, shadow);
+        this.baseSpeedModifier = .02;
+        this.speedModifier = this.baseSpeedModifier;
+        this.baseSpeed = speed;
+        this.prevSpeed = this.speed;
+        this.baseRotationModifier = .005 * randomSign();
+        this.rotationModifier = this.baseRotationModifier;
+        this.baseRotation = rotation;
+        this.color2 = color2;
+        this.outline = outline;
+        this.isProportionalSpeed = isProportionalSpeed;
+        this.isProportionalRotation = isProportionalRotation;
     }
 
     draw() {
@@ -52,16 +56,40 @@ class PokeBall extends Circle {
         this.context.lineWidth = null;
     }
 
-    updateRotation(rotation) {
-        if (rotation || rotation === 0) {
-            this.rotation = rotation;
+    calculateProportionalSpeed() {
+        return this.radius * this.speedModifier
+    }
+
+    calculateProportionalRotation() {
+        return this.speed * this.rotationModifier;
+    }
+
+    updateSpeed() {
+        if (this.isProportionalSpeed) {
+            // this.speed = this.calculateProportionalSpeed();
+            this.setSpeed(this.calculateProportionalSpeed());
         } else {
-            this.rotation = this.speed * this.rotationModifier;
+            // this.speed = this.baseSpeed;
+            this.setSpeed(this.baseSpeed);
+        }
+
+        if (this.prevSpeed !== this.speed) {
+            this.prevSpeed = this.speed;
+            this.updateDxDy();
+        }
+    }
+
+    updateRotation() {
+        if (this.isProportionalRotation) {
+            this.rotation = this.calculateProportionalRotation();
+        } else {
+            this.rotation = this.baseRotation;
         }
     }
 
     update() {
         this.updateRotation();
+        this.updateSpeed();
         this.updateAngle();
         this.move();
         this.draw();
@@ -132,9 +160,11 @@ const pokeBallCanvas = function () {
             }
 
             let direction = randomFloatInRange(-directionOffset, directionOffset);
+            let angle = randomFloatInRange(0, TWO_PI);
 
+            let pokeBall = new PokeBall(context, x, y, radius, direction, angle);
             // add a new poke ball
-            PokeBall.addToArray(pokeBalls, new PokeBall(context, x, y, radius, direction));
+            PokeBall.addToArray(pokeBalls, pokeBall);
         }
 
         // initial spawn set to false after initial poke ball placement

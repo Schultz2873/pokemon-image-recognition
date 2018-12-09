@@ -104,6 +104,13 @@ class CanvasObject {
     }
 
     /**
+     * Inverts the current rotation direction. (e.g. clockwise would become counterclockwise).
+     */
+    invertRotation() {
+        this.rotation *= -1;
+    }
+
+    /**
      * Moves object by updating x and y values by adding respective dx and dy values.
      */
     move() {

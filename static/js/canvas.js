@@ -124,6 +124,8 @@ class CanvasObject {
     drawShadow() {
         if (this.shadow && !this.shadow.isActive) {
             this.shadow.activate();
+        } else if (this.shadow) {
+            this.shadow.deactivate();
         }
     }
 
@@ -373,13 +375,14 @@ class Rectangle extends CanvasObject {
 // }
 
 /**
- * Draws a timed spark circle on the canvas. Note: spark persists when timer is over and should ideally be removed at
- * this point.
+ * Draws a timed spark circle on the canvas.
  */
 class Spark extends Circle {
     /**
      * Creates a new Spark object.
-     * @param context A 2D canvas context
+     * @param context A 2D canvas context.
+     * @param sparks An array of Spark objects for the new Spark to be added to. Allows dynamic removal of expired
+     * sparks.
      * @param x X value.
      * @param y Y value.
      * @param radius Circle radius in pixels.
@@ -391,24 +394,44 @@ class Spark extends Circle {
      * @param durationMs Spark active time in ms.
      * @param shadow Shadow object.
      */
-    constructor(context, x, y, radius, direction, speed, angle, rotation, color, durationMs, shadow = null) {
-        super(context, x, y, direction, speed, angle, rotation, color, shadow);
+    constructor(context, sparks, x, y, radius, direction, speed, angle, rotation, color, durationMs, shadow = null) {
+        super(context, x, y, radius, direction, speed, angle, rotation, color, shadow);
+        this.sparks = sparks;
         this.ms = 0;
+        this.updateMs();
         this.endTime = performance.now() + durationMs;
-        this.halfTime = this.endTime / 2;
+        this.decayStartMs = this.ms + (this.endTime - this.ms) * .9;
+    }
+
+    updateMs() {
+        this.ms = performance.now();
     }
 
     /**
-     * Updates alpha value, then moves and draws spark, then updates ms value.
+     * Updates alpha value, then moves and draws spark, then updates ms value. Removes the spark if expired.
+     * @returns {boolean} Returns true if the spark is still active, else false.
      */
     update() {
-        if (this.ms > this.halfTime) {
-            this.color.alpha = (this.ms - this.halfTime) / (this.endTime - this.halfTime);
+        this.updateMs();
+        if (this.ms >= this.decayStartMs) {
+            this.color.alpha = 1 - (this.ms - this.decayStartMs) / (this.endTime - this.decayStartMs);
         }
 
-        this.move();
-        this.draw();
-        this.ms++;
+        if (this.isActive()) {
+            this.move();
+            this.draw();
+        } else {
+            let i = 0;
+            while (i < this.sparks.length) {
+                if (this.sparks[i] === this) {
+                    this.sparks.splice(i, 1);
+                    return false;
+                }
+                i++;
+            }
+        }
+
+        return true;
     }
 
     /**

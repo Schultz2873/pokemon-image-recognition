@@ -38,13 +38,6 @@ class PredictionData:
 
         kb.clear_session()
 
-    def formatted_probability(self, ndigits=0):
-        probability = round(self.probability * 100, ndigits)
-
-        if ndigits == 0:
-            probability = int(probability)
-        return str(probability) + '%'
-
     def __str__(self):
         return 'image_path: ' + self.image_path + ', class_name: ' + self.class_name + ', class_index: ' + str(
             self.class_index) + ', probability: ' + str(

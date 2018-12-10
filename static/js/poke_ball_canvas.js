@@ -54,6 +54,7 @@ class PokeBall extends Circle {
         this.context.stroke();
 
         this.context.lineWidth = null;
+
     }
 
     calculateProportionalSpeed() {

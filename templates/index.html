@@ -44,7 +44,16 @@
                     {#                image upload form#}
                     <form id="upload-form" class="m-0" action="{{ url_for('upload') }}" method="post"
                           enctype=multipart/form-data>
-                        <input id="img-input" type="file" name="file">
+                        <input id="img-input" class="input-file" type="file" name="file">
+                        <div class="btn-group">
+                            <label id="img-input-label" class="btn btn-secondary m-0 border-right" for="img-input">Choose an
+                                image</label>
+                            <button id="form-clear" class="btn btn-secondary border-left"
+                                    type="button"><span
+                                    aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+
                         <input id="upload-submit" class="btn btn-info" type="submit" value="Analyze">
                     </form>
                 </div>

@@ -15,7 +15,7 @@ body {
     /*background-color: #383961;*/
     background-color: rgba(235, 0, 45, 1);
     /*border-bottom: 2px solid black;*/
-    box-shadow: 0 0 4px black;
+    box-shadow: 0 1px 4px black;
 }
 
 .nav-img {
@@ -44,6 +44,15 @@ body {
     left: 50%;
     -webkit-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
+}
+
+.input-file {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
 }
 
 .img-panel-container {

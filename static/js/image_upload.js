@@ -7,7 +7,15 @@
     let formClearButton = null;
     let submitButton = null;
 
-    let allowedExtensions = ['jpg', 'jpeg', 'png', 'svg'];
+    let allowedExtensions = [];
+
+    let colors = {
+        prediction: {
+            success: '#33ce7a',
+            probable: '#ffbd00',
+            unlikely: '#c42348'
+        }
+    };
 
 // loading icon assigned to auto-executing function for encapsulation
     /**
@@ -194,11 +202,11 @@
         let classNameNode = document.createTextNode(className + ' ');
         let probabilityNode = document.createTextNode(formatProbability(probability, decimalPlaces));
 
-        let color = '#33ce7a';
+        let color = colors.prediction.success;
         if (probability < .5) {
-            color = '#c42348';
+            color = colors.prediction.unlikely;
         } else if (probability < .8) {
-            color = '#ffbd00';
+            color = colors.prediction.probable;
         }
 
         let probabilitySpan = document.createElement('span');
@@ -235,44 +243,30 @@
     }
 
     /**
-     * Handles image classification upload. Hides/clears any current prediction results, starts the loading icon, gets
-     * prediction results via ajax, restores prediction element with ajax results, then stops loading icon.
-     * @param event Event.
+     * Sets allowed file extension values received server-side. Values assigned from hidden inputs.
      */
-    function handleImageUpload(event) {
-        clearElement(predictionElement);
-        loadingIcon.start();
-        event.preventDefault();
+    function assignAllowedExtensions() {
+        let elements = document.querySelector('#allowed-extensions').children;
 
-        let url = $(this).attr('action');
-        let requestMethod = $(this).attr('method');
-        let formData = new FormData(uploadForm);
-
-        // ajax image upload
-        $.ajax({
-            url: url,
-            type: requestMethod,
-            dataType: 'json',
-            data: formData,
-            contentType: false,
-            cache: false,
-            processData: false
-        }).done(function (response) {
-            console.log('response:', response);
-            let isSuccess = response.status === 'success';
-            if (isSuccess && response.num_files === 1) {
-                let data = response.data;
-
-                setPredictionElementContent(data.class_name, parseFloat(data.probability), 2);
-                setElementDisplay(predictionElement, 'initial');
-            } else if (isSuccess) {
-
+        // if elements present
+        if (elements.length > 0) {
+            for (let i = 0; i < elements.length; i++) {
+                allowedExtensions.push(elements[i].value.toLowerCase());
             }
 
-        }).fail(function () {
-        }).always(function () {
-            loadingIcon.stop();
-        });
+        } else {
+            // assign default values if no values found
+            allowedExtensions = ['jpg', 'jpeg', 'png', 'svg', 'gif'];
+        }
+    }
+
+    /**
+     * Checks if the passed in file extension is usable for image upload.
+     * @param filePath A file path.
+     * @returns {boolean} Returns true if the file extension is found in the list of allowed extensions, else false.
+     */
+    function isAllowedExtension(filePath) {
+        return allowedExtensions.includes(fileExtension(filePath.toLowerCase()));
     }
 
     /**
@@ -285,6 +279,54 @@
         clearElement(predictionElement);
     }
 
+    /**
+     * Handles image classification upload. Hides/clears any current prediction results, starts the loading icon, gets
+     * prediction results via ajax, restores prediction element with ajax results, then stops loading icon.
+     * @param event Event.
+     */
+    function handleImageUpload(event) {
+        // prevent standard form submit
+        event.preventDefault();
+
+        // clear existing prediction display
+        clearElement(predictionElement);
+
+        // if file selected and extension allowed
+        if (imageInput.value && isAllowedExtension(imageInput.value)) {
+            loadingIcon.start();
+
+            let url = $(this).attr('action');
+            let requestMethod = $(this).attr('method');
+            let formData = new FormData(uploadForm);
+
+            // ajax image upload
+            $.ajax({
+                url: url,
+                type: requestMethod,
+                dataType: 'json',
+                data: formData,
+                contentType: false,
+                cache: false,
+                processData: false
+            }).done(function (response) {
+                console.log('response:', response);
+
+                // if successful, process prediction result
+                if (response.status === 'success' && response.data) {
+                    let data = response.data;
+
+                    setPredictionElementContent(data.class_name, parseFloat(data.probability), 2);
+                    setElementDisplay(predictionElement, 'initial');
+                }
+
+            }).always(function () {
+                loadingIcon.stop();
+            });
+        }
+
+
+    }
+
     window.addEventListener('load', function () {
         predictionElement = document.querySelector('#prediction');
         imageInput = document.querySelector('#img-input');
@@ -294,7 +336,9 @@
         submitButton = document.querySelector('#upload-submit');
 
         setElementDisplay(predictionElement, 'none');
+        assignAllowedExtensions();
 
+        // form clear listener
         formClearButton.addEventListener('click', handleFormClear);
 
         // form onchange listener

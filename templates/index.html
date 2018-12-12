@@ -63,6 +63,14 @@
     </div>
 </div>
 
+{#allowed extensions#}
+<div id="allowed-extensions">
+    {% for extension in allowed_extensions %}
+        <input type="hidden" value="{{ extension }}">
+    {% endfor %}
+
+</div>
+
 {#poke ball background canvas#}
 <canvas id="poke-ball-canvas" class="background-canvas"></canvas>
 

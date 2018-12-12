@@ -18,7 +18,7 @@ def is_allowed_file_extension(filename):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', allowed_extensions=app.config['ALLOWED_EXTENSIONS'])
 
 
 @app.route('/upload', methods=['POST'])
@@ -96,7 +96,7 @@ def upload():
 
 if __name__ == '__main__':
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'svg'}
+    app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'svg', 'gif'}
     app.config['UPLOAD_FOLDER'] = '../pokemon-repo/temp_img'
     app.config['IMAGE_CONVERSION_SIZE'] = 100, 100
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024

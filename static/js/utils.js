@@ -325,6 +325,11 @@ function randomSign() {
     }
 }
 
+function fileExtension(filePath) {
+    let periodIndex = filePath.lastIndexOf('.') + 1;
+    return filePath.slice(periodIndex, filePath.length);
+}
+
 function toRadians(degrees) {
     return degrees * Math.PI / HALF_DEGREES;
 }

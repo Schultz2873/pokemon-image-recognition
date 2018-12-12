@@ -9,17 +9,16 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
           integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/main.css') }}">
-
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light poke-navbar">
-    <a class="navbar-brand" href="/">
+    <a class="navbar-brand" href="{{ url_for('index') }}">
         <img src="/static/images/pokeball.png" class="d-inline-block align-top nav-img" alt="poke ball">
     </a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link txt-white" href="#"><span class="txt-white">Home</span>
+                <a class="nav-link txt-white" href="{{ url_for('index') }}"><span class="txt-white">Home</span>
                     <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
@@ -44,9 +43,11 @@
                     {#                image upload form#}
                     <form id="upload-form" class="m-0" action="{{ url_for('upload') }}" method="post"
                           enctype=multipart/form-data>
+                        {#                        file input#}
                         <input id="img-input" class="input-file" type="file" name="file">
                         <div class="btn-group">
-                            <label id="img-input-label" class="btn btn-secondary m-0 border-right" for="img-input">Choose an
+                            <label id="img-input-label" class="btn btn-secondary m-0 border-right" for="img-input">Choose
+                                an
                                 image</label>
                             <button id="form-clear" class="btn btn-secondary border-left"
                                     type="button"><span
@@ -78,6 +79,6 @@
 <script src="{{ url_for('static',filename='js/utils.js') }}"></script>
 <script src="{{ url_for('static',filename='js/canvas.js') }}"></script>
 <script src="{{ url_for('static',filename='js/poke_ball_canvas.js') }}"></script>
-<script src="{{ url_for('static',filename='js/poke_upload.js') }}"></script>
+<script src="{{ url_for('static',filename='js/image_upload.js') }}"></script>
 </body>
 </html>

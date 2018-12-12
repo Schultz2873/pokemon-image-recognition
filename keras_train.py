@@ -27,13 +27,12 @@ class PredictionData:
 
         img_tensor /= 255.
 
-        class_predictions = model.predict(img_tensor)[0]
+        class_predictions = model.predict(img_tensor, batch_size=1, verbose=1)[0]
 
         self.image_path = image_path
         self.class_index = class_indices[0]
         self.class_name = class_label(labels_directory, self.class_index)
         self.probability = max(class_predictions)
-        self.predictions = class_predictions
         self.labels = os.listdir(labels_directory)
 
         kb.clear_session()
@@ -41,7 +40,7 @@ class PredictionData:
     def __str__(self):
         return 'image_path: ' + self.image_path + ', class_name: ' + self.class_name + ', class_index: ' + str(
             self.class_index) + ', probability: ' + str(
-            self.probability) + ', predictions: ' + self.predictions.__str__() + ', labels: ' + self.labels.__str__()
+            self.probability) + ', labels: ' + self.labels.__str__()
 
 
 def save_model(model, file_name: str = None):

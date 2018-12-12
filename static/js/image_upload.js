@@ -1,10 +1,13 @@
 // auto-executing function for encapsulation
 (function () {
     let predictionElement = null;
+    let imageInput = null;
     let uploadForm = null;
     let imagePreviewElement = null;
     let formClearButton = null;
     let submitButton = null;
+
+    let allowedExtensions = ['jpg', 'jpeg', 'png', 'svg'];
 
 // loading icon assigned to auto-executing function for encapsulation
     /**
@@ -20,7 +23,7 @@
         let isUseSparks = false;
         let lastSparkSpawn = null;
         let animationFrame = null;
-        let isActive = false;
+        let isRunning = false;
 
         /**
          * Initializes variables, sets canvas size.
@@ -124,8 +127,8 @@
          * Starts the poke ball icon animation.
          */
         function start() {
-            if (!isActive) {
-                isActive = true;
+            if (!isRunning) {
+                isRunning = true;
                 createPokeBall();
                 setElementDisplay(canvas, 'initial');
                 animate();
@@ -137,7 +140,7 @@
          */
         function stop() {
             cancelAnimationFrame(animationFrame);
-            isActive = false;
+            isRunning = false;
             setElementDisplay(canvas, 'none');
             deletePokeBall();
             clearSparks();
@@ -245,6 +248,7 @@
         let requestMethod = $(this).attr('method');
         let formData = new FormData(uploadForm);
 
+        // ajax image upload
         $.ajax({
             url: url,
             type: requestMethod,
@@ -254,15 +258,19 @@
             cache: false,
             processData: false
         }).done(function (response) {
-            let responseData = {
-                status: response.status,
-                class_name: response.class_name,
-                probability: parseFloat(response.probability)
-            };
-            console.log(responseData);
+            console.log('response:', response);
+            let isSuccess = response.status === 'success';
+            if (isSuccess && response.num_files === 1) {
+                let data = response.data;
 
-            setPredictionElementContent(responseData.class_name, responseData.probability, 2);
-            setElementDisplay(predictionElement, 'initial');
+                setPredictionElementContent(data.class_name, parseFloat(data.probability), 2);
+                setElementDisplay(predictionElement, 'initial');
+            } else if (isSuccess) {
+
+            }
+
+        }).fail(function () {
+        }).always(function () {
             loadingIcon.stop();
         });
     }
@@ -279,6 +287,7 @@
 
     window.addEventListener('load', function () {
         predictionElement = document.querySelector('#prediction');
+        imageInput = document.querySelector('#img-input');
         uploadForm = document.querySelector('#upload-form');
         imagePreviewElement = document.querySelector('#img-preview');
         formClearButton = document.querySelector('#form-clear');
@@ -289,7 +298,7 @@
         formClearButton.addEventListener('click', handleFormClear);
 
         // form onchange listener
-        document.querySelector('#img-input').addEventListener('change', handleFormChange);
+        imageInput.addEventListener('change', handleFormChange);
 
         // image upload
         uploadForm.addEventListener('submit', handleImageUpload);

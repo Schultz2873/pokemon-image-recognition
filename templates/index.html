@@ -13,7 +13,11 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-light poke-navbar">
     <a class="navbar-brand" href="{{ url_for('index') }}">
-        <img src="/static/images/pokeball.png" class="d-inline-block align-top nav-img" alt="poke ball">
+        {#        <img src="/static/images/pokeball-3d.png" class="d-inline-block align-top nav-img" alt="poke ball">#}
+
+        {#        https://vgboxart.com/resource/13697/pokeball-render/#}
+        <img src="{{ url_for('static',filename='images/pokeball.png') }}" class=" d-inline-block align-top nav-img"
+             alt="poke ball">
     </a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">

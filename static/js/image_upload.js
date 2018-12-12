@@ -294,10 +294,15 @@
         // if file selected and extension allowed
         if (imageInput.value && isAllowedExtension(imageInput.value)) {
             loadingIcon.start();
+            console.log('file input:', imageInput.files);
 
             let url = $(this).attr('action');
             let requestMethod = $(this).attr('method');
-            let formData = new FormData(uploadForm);
+            let formData = new FormData();
+            let file = imageInput.files[0];
+            formData.append('file', file, file.name);
+
+            console.log('formData:', formData);
 
             // ajax image upload
             $.ajax({
@@ -308,6 +313,8 @@
                 contentType: false,
                 cache: false,
                 processData: false
+            }).fail(function (response) {
+                console.log('ajax fail', response);
             }).done(function (response) {
                 console.log('response:', response);
 
@@ -323,8 +330,6 @@
                 loadingIcon.stop();
             });
         }
-
-
     }
 
     window.addEventListener('load', function () {

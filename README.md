@@ -2,7 +2,7 @@
 
 Pokemon Image Recognition is a web application that uses a Convolutional Neural Network to detect if an image uploaded by a user contains a Pokemon.
 
-### Technologues ###
+### Technologies ###
 
 - Python
 - Javascript
